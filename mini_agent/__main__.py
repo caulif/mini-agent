@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""让 `python -m mini_agent` 直接启动 CLI。"""
+"""Start the CLI with python -m mini_agent."""
 
 import sys
 

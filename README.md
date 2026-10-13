@@ -1,14 +1,25 @@
 # mini agent
 
-一份手写的 coding agent，附带七章教程。实现参考了 [pi](https://github.com/badlogic/pi-mono) 和 [Codex](https://github.com/openai/codex) 的源码，用来看清循环本身：问模型、执行工具、把结果塞回历史，直到模型不再调用工具。
+English | [简体中文](README.zh-CN.md)
 
-教程用浏览器打开 [guide.html](guide.html)。
+A handwritten coding agent with a seven-chapter implementation guide. Inspired by the source code of [pi](https://github.com/badlogic/pi-mono) and [Codex](https://github.com/openai/codex), it makes the core loop visible: ask the model, execute tools, append results to history, and repeat until there are no more tool calls.
 
-它只使用 Python 标准库。工具能读、写、修改当前工作目录里的文件，也能在这里执行命令。命令黑名单只是教学用的字面匹配，不是沙箱。
+Read the [English tutorial online](https://caulif.github.io/mini-agent/guide.html) or switch to [简体中文](https://caulif.github.io/mini-agent/guide.zh-CN.html). Both editions cover the same seven chapters and code excerpts. Source comments, docstrings, and CLI messages are in English.
 
-## 启动
+For offline reading, clone or download the repository and open `guide.html` in your browser. GitHub's file view displays HTML source instead of the rendered tutorial.
 
-在要让它工作的目录打开终端：
+The runtime uses only the Python standard library. Its tools can read, write, and edit files under the working directory, and execute shell commands. The command blacklist is a teaching example, not a sandbox.
+
+## Quick start
+
+Use Python 3.10 or newer. Clone the repository and enter its directory:
+
+```sh
+git clone https://github.com/caulif/mini-agent.git
+cd mini-agent
+```
+
+Windows PowerShell:
 
 ```powershell
 $env:OPENAI_BASE_URL = "https://api.openai.com/v1"
@@ -17,25 +28,42 @@ $env:MODEL_ID = "gpt-4o-mini"
 python -m mini_agent
 ```
 
-`OPENAI_BASE_URL` 可以换成任何兼容 Chat Completions 的地址。不设 `MODEL_ID` 时默认是 `gpt-4o-mini`。
+macOS / Linux (Bash):
+
+```sh
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+export OPENAI_API_KEY="sk-..."
+export MODEL_ID="gpt-4o-mini"
+python3 -m mini_agent
+```
+
+`OPENAI_BASE_URL` can point to a compatible Chat Completions endpoint. The default model is `gpt-4o-mini`.
+
+To work in another directory, add this repository's absolute path to `PYTHONPATH`, then start the agent from your target directory. File tools and sessions use the current working directory.
+
+## Language
+
+The CLI is English-only. The tutorial opens in English and offers a Chinese language link. Model replies follow the user's language; file contents and command output retain their original text.
+
+## Usage
 
 ```powershell
 python -m mini_agent --help
-python -m mini_agent -c                  # 继续最近一次会话
-python -m mini_agent --resume <id>       # 恢复指定会话，可只写前缀
-python -m mini_agent -v --max-turns 8    # 显示工具输出，并限制每轮最多问模型几次
-python -m mini_agent -p "列出当前目录的 py 文件"
+python -m mini_agent -c                  # Continue the latest session
+python -m mini_agent --resume <id>       # Resume by ID or prefix
+python -m mini_agent -v --max-turns 8    # Show tools; limit model calls
+python -m mini_agent -p "List Python files in this directory"
 ```
 
-进入对话后直接输入任务。运行中再输入的文字会在下一轮插入；`Ctrl+C` 中断当前这一轮。停在提示符时，`Ctrl+C` 或 `/exit` 退出。
+Type a task to begin. Input entered while the agent runs is queued for the next model call. `Ctrl+C` interrupts the current turn; at the idle prompt, `Ctrl+C` or `/exit` exits.
 
 ```text
 /help    /new     /list    /resume <id>
 /skills  /compact /stats   /exit
 ```
 
-会话写在当前目录的 `.mini_agent/sessions/`。当前目录下的 `skills/*.md` 会在启动时拼进系统提示词，改完后需要重新启动。
+Sessions are saved under `.mini_agent/sessions/` in the working directory. Files matching `skills/*.md` in that directory are loaded into the system prompt at startup; restart after changing them.
 
-## 许可
+## License
 
-代码使用 [MIT 许可证](mini_agent/LICENSE)。教程中的 pi、Codex 摘录另行保留上游许可，见 [引用声明](mini_agent/THIRD_PARTY_NOTICES.md)。
+Original code and tutorial content are licensed under [MIT](LICENSE). Third-party excerpts retain their respective licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
