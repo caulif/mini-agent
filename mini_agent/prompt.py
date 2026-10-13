@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-mini_agent · 系统提示词组装（第 7 章新增）
+"""System-prompt assembly (chapter 7).
 
-前面几章的系统提示词就是 llm.py 里那一行写死的字符串。
-这一章把它变成"组装"出来的东西，因为有三个需求：
-
-  1. **环境信息是动态的** —— 当前工作目录、今天日期、操作系统。
-     写死的话 agent 就不知道自己在哪、今天是哪天。
-  2. **技能是可扩展的** —— 把若干份 .md 说明文件拼进来，
-     等于给 agent 加"专项知识"，而不用改代码。
-  3. **顺序是有讲究的** —— 大模型的注意力在开头和结尾最强，
-     最关键的约束（你该用什么风格干活）要放开头，
-     易变的背景信息放后面。
-"""
+Combine stable behavior instructions, a current environment snapshot, and
+optional Markdown skills. Keep essential instructions first and project
+knowledge last. The CLI builds this prompt once when App is initialized."""
 
 import datetime
 import os
 import platform
 
-# ── 第 1 层：骨架（最关键的约束，放最前面）──────────────────
-# 这几句话决定了 agent 的整体行为风格。改动这里要慎重，
-# 它比任何一次工具调用都更影响最终表现。
+
+# Layer 1: stable behavior instructions come first.
+# These instructions define the agent's overall working style.
+# They influence every turn, so keep changes deliberate.
 BASE_PROMPT = """\
 You are a coding agent working in a terminal.
 
@@ -38,7 +30,7 @@ How you talk:
 
 
 def environment_block():
-    """第 2 层：当前环境。每次都重新算 —— 日期会变，目录会变。"""
+    """Read the working directory, platform, and date when called."""
     return (
         "\nEnvironment:\n"
         f"- working directory: {os.getcwd()}\n"
@@ -47,24 +39,23 @@ def environment_block():
     )
 
 
-# ── 第 3 层：技能（可选，从外部 .md 文件加载）─────────────────
+# Layer 3: optional Markdown skills loaded from disk.
 #
-# 一个"技能"就是一个 markdown 文件，讲清某类任务该怎么做。
-# 比如 "git-commit.md" 里写好本项目的提交信息规范，
-# agent 遇到提交任务时就有了这份额外知识。
+# A skill is a Markdown file describing how to handle a task.
+# For example, git-commit.md can describe commit-message conventions.
+# The agent receives this project-specific knowledge in its prompt.
 #
-# 为什么用文件而不是写进代码？因为改一个 .md 不需要碰代码，
-# 而且可以按项目分别准备 —— 换项目就换一套技能。
+# Markdown keeps project rules independent of Python implementation.
+# Different working directories can provide different skills.
 
 SKILLS_DIRNAME = "skills"
 
 
 def load_skills(root=None):
-    """扫描 skills/ 目录，读回所有 .md 文件。
-
-    返回列表，每项 {"name": 文件名（去扩展名）, "body": 内容}。
-    目录不存在时返回空列表 —— 技能是可选增强，缺了不能报错。
-    """
+    """Load nonempty Markdown files from the working directory's skills folder.
+    
+    Return dictionaries with name and body. A missing directory is allowed;
+    this teaching implementation skips individual unreadable files."""
     root = root or os.getcwd()
     skills_dir = os.path.join(root, SKILLS_DIRNAME)
     if not os.path.isdir(skills_dir):
@@ -79,14 +70,14 @@ def load_skills(root=None):
             with open(path, "r", encoding="utf-8", errors="replace") as f:
                 body = f.read().strip()
         except OSError:
-            continue                       # 单个文件读不了，跳过就好
+            continue                       # Skip an unreadable optional skill file.
         if body:
             skills.append({"name": os.path.splitext(name)[0], "body": body})
     return skills
 
 
 def skills_block(skills=None, root=None):
-    """第 3 层：技能正文。没有技能时返回空串。"""
+    """Render skill contents, returning an empty string when no skills exist."""
     skills = load_skills(root) if skills is None else skills
     if not skills:
         return ""
@@ -97,10 +88,7 @@ def skills_block(skills=None, root=None):
 
 
 def build_system_prompt(skills=None, root=None):
-    """拼出最终的系统提示词：骨架 + 环境 + 技能。
-
-    顺序就是 骨架 → 环境 → 技能，理由见文件开头第 3 条。
-    skills 传 [] 表示明确不要技能（测试时用），
-    传 None 表示"你去磁盘上找"。
-    """
+    """Combine behavior instructions, environment information, and skills.
+    
+    Pass skills=[] to disable skills, or None to load them from disk."""
     return BASE_PROMPT + environment_block() + skills_block(skills, root)

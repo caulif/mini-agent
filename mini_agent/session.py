@@ -1,23 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-mini_agent · 会话持久化（第 5 章新增）
+"""Conversation persistence using JSON Lines (chapter 5).
 
-问题：前三章的 agent 一关掉，对话就没了。哪怕只是 Ctrl+C 出去看一眼
-别的文件再回来，也得从头把上下文重新喂一遍。上下文本身就是 agent
-最贵的东西，丢掉它等于把之前花的 token 全浪费了。
+Append one JSON object per message so history can be reloaded later.
+The loop owns in-memory appends; its persistence hook writes only to disk.
+Compaction replaces history and therefore requires a full file rewrite."""
 
-解决办法：每追加一条消息就往磁盘写一行 JSON（JSONL 格式）。
-
-为什么是 JSONL 而不是一整个 JSON 数组？
-  1. 追加便宜 —— 一行一条，直接 append 就行。整个 JSON 数组要
-     读出来、解析、push、再序列化、再整份覆盖写。
-  2. 崩溃安全 —— 写到第 7 行时断电，前 6 行还是完整可解析的。
-     整个 JSON 文件损坏的话，一个字节都不剩。
-  3. 能和很长的会话共存 —— 不会因为内存里存不下而失败。
-
-这就是"事件日志"（event log）思路：只追加，不修改，当前状态
-由重放日志算出来。
-"""
 
 import json
 import os
@@ -28,26 +15,18 @@ from .config import CONFIG
 
 
 class Session:
-    """一段可持久化的对话。
-
-    用法：
-        s = Session.create()          # 新建
-        s.append("user", "你好")       # 追加消息，立即落盘
-        s2 = Session.load(path)        # 从磁盘恢复
-
-    内存里的 messages 和磁盘上的文件保持一致：每次 append 都写盘。
-    """
+    """A conversation with an in-memory message list and a JSONL file."""
 
     def __init__(self, session_id, messages, path):
         self.id = session_id
-        self.messages = messages      # 直接给 agent_loop 用的那个列表
+        self.messages = messages      # The same message list used by agent_loop.
         self.path = path
 
-    # ── 构造 ──────────────────────────────────────────────────
+    # Construction.
 
     @classmethod
     def create(cls, session_id=None, session_dir=None):
-        """新建一段会话。session_id 为空时自动生成一个。"""
+        """Create a session, generating an ID when none is provided."""
         session_id = session_id or time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6]
         directory = session_dir or CONFIG["session_dir"]
         os.makedirs(directory, exist_ok=True)
@@ -56,13 +35,9 @@ class Session:
 
     @classmethod
     def load(cls, path):
-        """从 JSONL 文件恢复。
-
-        这里体现了 JSONL 的第三个好处：**单行坏掉不影响整体**。
-        下面的读取逻辑跳过解析失败的行，而不是整个文件报错。
-        """
+        """Reload JSONL messages, warning and skipping lines with invalid JSON."""
         if not os.path.exists(path):
-            raise FileNotFoundError(f"会话文件不存在: {path}")
+            raise FileNotFoundError('Session file not found: {0}'.format(path))
         messages = []
         skipped = 0
         with open(path, "r", encoding="utf-8") as f:
@@ -76,36 +51,31 @@ class Session:
                     skipped += 1
         session_id = os.path.splitext(os.path.basename(path))[0]
         if skipped:
-            print(f"[警告] 跳过 {skipped} 行损坏数据")
+            print('[Warning] Skipped {0} corrupt lines'.format(skipped))
         return cls(session_id, messages, path)
 
-    # ── 追加 ──────────────────────────────────────────────────
+    # Appending messages.
 
     def append(self, role, content):
-        """追加一条消息并立即落盘。返回这条消息本身。"""
+        """Append a role/content message to memory and disk, then return it."""
         msg = {"role": role, "content": content}
         self.messages.append(msg)
         self._write_line(msg)
         return msg
 
     def append_message(self, msg):
-        """追加一条完整消息 dict 到内存，并落盘。返回它。
-
-        给"我们自己新增历史"的场景用（比如 extend 恢复历史）。
-        **不要**把它当作 agent_loop 的 on_append 钩子 —— 循环已经
-        自己 append 过了，那样会一条消息存两份（踩过这个坑）。
-        """
+        """Append a complete message to memory and disk, then return it.
+        
+        Do not use this as the loop's on_append hook: the loop has already appended
+        the message, so doing it here would duplicate the in-memory entry."""
         self.messages.append(msg)
         self._write_line(msg)
         return msg
 
     def persist(self, msg):
-        """只把一条**已经在 self.messages 里**的消息写到磁盘。
-
-        这才是 agent_loop 的 on_append 钩子该用的方法。
-        契约：循环负责改内存，我们负责落盘 —— 各管一件事，
-        谁也不重复对方的活。
-        """
+        """Save a message that the loop has already appended to memory.
+        
+        Use this as on_append: the loop changes memory; this method writes to disk."""
         self._write_line(msg)
         return msg
 
@@ -113,27 +83,24 @@ class Session:
         with open(self.path, "a", encoding="utf-8") as f:
             f.write(json.dumps(msg, ensure_ascii=False) + "\n")
 
-    # ── 与 agent 的衔接 ────────────────────────────────────────
+    # Integration with the agent loop.
 
     def replace_messages(self, messages):
-        """整体替换内存里的历史，并**重写磁盘**。
-
-        这是给第 6 章的压缩用的：压缩会把前 N 条换成 1 条摘要，
-        这不是"追加"，是"重写"。所以要有这么一个明确的入口 ——
-        别偷偷改 self.messages 而不落盘，那样磁盘和内存就不一致了。
-        """
-        # 必须**就地**替换，不能写成 self.messages = messages。
-        # 因为 agent_loop 和调用方都持有原来那个列表对象；
-        # 换成新对象会让它们的后续 append 写进一个"已经没人看"的
-        # 列表里 —— 内存与磁盘从此脱钩（踩过这个坑）。
+        """Replace history in place and rewrite the JSONL file via a temporary file.
+        
+        Preserve the list object shared by the session and loop."""
+        # Replace contents in place rather than assigning a new list.
+        # The loop and caller still hold references to this list object.
+        # Rebinding would leave later appends on an outdated list.
+        # Slice assignment keeps memory and persistence connected.
         self.messages[:] = messages
         tmp = self.path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             for msg in messages:
                 f.write(json.dumps(msg, ensure_ascii=False) + "\n")
-        os.replace(tmp, self.path)      # 原子替换，避免写一半崩溃
+        os.replace(tmp, self.path)      # Replace the file atomically after writing the temporary copy.
 
-    # ── 清点 ──────────────────────────────────────────────────
+    # Session inventory.
 
     def stats(self):
         return {
@@ -145,7 +112,7 @@ class Session:
 
 
 def list_sessions(session_dir=None):
-    """列出所有会话文件，最近的排前面。"""
+    """List session files, most recent first."""
     directory = session_dir or CONFIG["session_dir"]
     if not os.path.isdir(directory):
         return []
@@ -159,9 +126,6 @@ def list_sessions(session_dir=None):
 
 
 def latest_session(session_dir=None):
-    """返回最近改动的那个会话文件路径，没有则 None。
-
-    CLI 的 --continue 参数就靠它 —— "接着上次那一段继续"。
-    """
+    """Return the most recently modified session path, or None."""
     files = list_sessions(session_dir)
     return files[0] if files else None

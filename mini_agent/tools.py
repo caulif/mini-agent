@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-mini_agent · 工具注册表（S02 建立，S03 加入 edit + 变更队列）
+"""Tool schemas, handlers, and dispatch (chapters 2 and 3).
 
-核心思想：**工具名 → 处理函数** 的一张表。
-
-循环里只写一行 `submit(name, input)`，加工具只改这个文件，
-不用碰 agent.py。这是整个项目最重要的一处解耦。
-
-每章新增的工具都往下面的 TABLES 段里加，不要改 dispatch 逻辑本身。
-"""
+TOOLS describes functions to the model; HANDLERS maps names to implementations.
+Each handler accepts a dictionary and returns text, so the loop only needs
+submit(name, inp). File writes and edits share the per-path mutation queue."""
 
 import os
 import subprocess
@@ -17,14 +12,14 @@ from .config import BLOCKED_PATTERNS, CONFIG
 from .mutation_queue import mutation_queue
 
 # ═══════════════════════════════════════════════════════════
-# 工具定义（发给 LLM 的 schema）
+# Tool schemas sent to the model.
 # ═══════════════════════════════════════════════════════════
 #
-# 这部分会被原样序列化进请求体的 tools 字段。
-# 每加一个工具，这里要有对应的声明，否则模型不知道它能用。
+# These schemas are serialized into the request's tools field.
+# Every available handler needs a corresponding declaration.
 
 def _function(name, description, properties, required):
-    """包装一条 OpenAI 函数工具定义。"""
+    """Build an OpenAI-style function tool schema."""
     return {
         "type": "function",
         "function": {
@@ -79,18 +74,15 @@ TOOLS = [
 ]
 
 # ═══════════════════════════════════════════════════════════
-# 路径校验
+# Path validation.
 # ═══════════════════════════════════════════════════════════
 
 
 def safe_path(raw):
-    """解析为绝对路径，并确认落在工作目录的子树内。
-
-    为什么需要它：模型可能给出 ../../etc/passwd 这样的路径。
-    教学版用 realpath 解析（同时处理符号链接），然后比对前缀。
-
-    :raises ValueError: 路径逃出了工作目录
-    """
+    """Resolve a path and reject targets outside the working directory.
+    
+    realpath also resolves symbolic links. Raise ValueError for an outside path.
+    This check applies to file tools; it does not sandbox shell commands."""
     workdir = os.path.realpath(os.getcwd())
     target = os.path.realpath(os.path.join(workdir, raw or "."))
     if target != workdir and not target.startswith(workdir + os.sep):
@@ -99,15 +91,15 @@ def safe_path(raw):
 
 
 # ═══════════════════════════════════════════════════════════
-# 工具实现
+# Tool implementations.
 # ═══════════════════════════════════════════════════════════
 #
-# 所有工具函数签名统一： (input: dict) -> str
-# 这样才能塞进同一张 dispatch 表。
+# All handlers share the signature (input: dict) -> str.
+# This uniform contract enables one dispatch table.
 
 
 def tool_bash(inp):
-    """执行 shell 命令。三道护栏：黑名单 → 超时 → 输出截断。"""
+    """Run a shell command with a literal blacklist, timeout, and output limit."""
     command = str(inp.get("command", ""))
     if any(pattern in command for pattern in BLOCKED_PATTERNS):
         return "Error: Dangerous command blocked"
@@ -133,11 +125,7 @@ def tool_bash(inp):
 
 
 def tool_read(inp):
-    """读文件文本内容，支持 offset/limit 分页。
-
-    文件操作不走 shell —— 没有引号转义、没有 glob 展开，
-    路径就是路径，内容就是内容。
-    """
+    """Read numbered UTF-8 text with offset/limit pagination, without a shell."""
     try:
         abs_path = safe_path(str(inp.get("path", "")))
     except ValueError as e:
@@ -154,7 +142,7 @@ def tool_read(inp):
     start = max(0, offset - 1)
     selected = lines[start : start + limit]
 
-    # 带上行号，方便模型引用具体位置
+    # Include line numbers so the model can reference exact locations.
     numbered = "".join(
         f"{start + i + 1:>6}\t{line}" for i, line in enumerate(selected)
     )
@@ -165,11 +153,7 @@ def tool_read(inp):
 
 
 def tool_write(inp):
-    """写文件（整文件覆盖）。
-
-    S03 起，整个写盘动作进变更队列 —— 和 edit 共用一条队列，
-    这样两个操作改同一个文件时不会交错。
-    """
+    """Overwrite a whole file under the shared per-path mutation lock."""
     path = str(inp.get("path", ""))
     content = str(inp.get("content", ""))
     try:
@@ -190,14 +174,10 @@ def tool_write(inp):
 
 
 def tool_edit(inp):
-    """定点替换文件里的一小段内容（S03 新增）。
-
-    和 write 的区别：write 是整文件覆盖，edit 是"手术"。
-    整文件重写既浪费 token，又容易在无关的地方引入笔误。
-
-    关键：替换前必须确认 old_string 在文件里**唯一**，
-    否则你不知道改的是哪一处。
-    """
+    """Replace one exact match under the shared per-path mutation lock.
+    
+    Read, count matches, and write within the same protected operation. Require
+    exactly one old_string match to avoid changing an unintended occurrence."""
     path = str(inp.get("path", ""))
     old_string = str(inp.get("old_string", ""))
     new_string = str(inp.get("new_string", ""))
@@ -233,15 +213,15 @@ def tool_edit(inp):
             return f"Error: {e}"
         return f"Edited {path}"
 
-    # 整个"读 → 查重 → 写"序列作为一个原子单元排队
+    # Protect the entire read, match, and write operation.
     return mutation_queue.run(abs_path, mutate)
 
 
 # ═══════════════════════════════════════════════════════════
-# dispatch 表
+# Dispatch table.
 # ═══════════════════════════════════════════════════════════
 #
-# 加工具 = 在 TABLES 里加一项。循环一行都不用改。
+# Add handlers here without changing the loop.
 
 HANDLERS = {
     "bash": tool_bash,
@@ -252,16 +232,15 @@ HANDLERS = {
 
 
 def submit(name, inp):
-    """执行一个工具调用，返回结果文本。
-
-    这是循环唯一需要的入口。未知工具名不抛异常，
-    而是把错误作为工具结果返回给模型 —— **让模型自己纠正**。
-    """
+    """Dispatch a tool by name and return its result as text.
+    
+    Return errors to the model so it can correct a call instead of crashing
+    the agent. Unexpected handler exceptions are also converted to result text."""
     handler = HANDLERS.get(name)
     if handler is None:
         known = ", ".join(sorted(HANDLERS))
         return f"Error: unknown tool '{name}'. Available tools: {known}"
     try:
         return handler(inp)
-    except Exception as e:  # 工具内部意外异常也不能让 agent 崩掉
+    except Exception as e:  # Convert unexpected handler failures into model-visible errors.
         return f"Error: {type(e).__name__}: {e}"
