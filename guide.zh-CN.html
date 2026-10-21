@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>mini agent · 手搓一个 coding agent · 实现指南</title>
+<title>mini agent-1 · 实现指南</title>
 <style>
 :root{
   --bg:#ffffff; --bg2:#f7f8fa; --bg3:#eef1f6; --fg:#1f2430; --dim:#5c6678;
@@ -285,24 +285,21 @@ table.plain th{color:var(--dim);font-weight:600;font-size:13.5px}
 footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--line);
   color:var(--dim);font-size:13.5px}
 </style>
+<!-- agent-series:style --><style>.series-bridge{margin:24px 0;padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--bg2);font-size:14px}.series-bridge p{margin:6px 0}.series-bridge a{font-weight:600}.series-language{font-size:13.5px;white-space:nowrap;padding:4px 8px;border-left:1px solid var(--line)}[id]{scroll-margin-top:var(--series-offset,110px)}.top nav a[aria-current="page"]{color:var(--fg);background:var(--bg3)}@media(max-width:600px){.wrap li code,.wrap p code{white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .sumfile{white-space:normal;overflow-wrap:anywhere;min-width:0;max-width:100%}.step .codewrap>summary .sumcap{white-space:normal;min-width:0}.frow{flex-wrap:wrap}.frow .fdesc{flex:1 1 200px;min-width:0}.frow .mono{overflow-wrap:anywhere;min-width:0}.frow code{white-space:normal;overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}</style><!-- /agent-series -->
 </head>
 <body>
-<header class="top">
-  <div class="top-in">
-    <div class="brand">mini<span> agent</span> · 手搓一个 coding agent</div>
-    <nav><a href="guide.html" style="color:var(--fg)">English</a><a href="guide.zh-CN.html">实现指南</a></nav>
-  </div>
-</header>
+<header class="top"><div class="top-in"><div class="brand">mini<span> agent-1</span> · 手搓一个 coding agent</div><nav aria-label="Series"><a href="#series-start" aria-current="page">mini agent-1</a><a href="../learn-2.0/advanced-guide.zh-CN.html">mini agent-2</a></nav><a class="series-language" data-target="guide.html" href="guide.html" lang="en">English</a></div></header>
 <div class="wrap">
 
 <div class="hero"><p class="goal">教程默认使用英文，可通过顶部语言链接切换中文。源码注释、文档字符串和 CLI 提示全部使用英文；模型回复跟随用户语言。</p>
-  <h1>mini agent</h1>
+  <h1 id="series-start">mini agent-1</h1>
   <p class="lead">这份个人整理主要参考了 pi 和 Codex 的源码。</p>
   <div class="tree toc" style="font-size:13px">
     <div class="toc-title"><b>目录</b></div>
     <div class="toc-row">第 1 章 · <a href="#ch1">Agent Loop</a>　<span class="c">把循环跑起来</span></div><div class="toc-row">第 2 章 · <a href="#ch2">Tools</a>　<span class="c">给 agent 一双手</span></div><div class="toc-row">第 3 章 · <a href="#ch3">变更队列</a>　<span class="c">并发写文件不能乱</span></div><div class="toc-row">第 4 章 · <a href="#ch4">中断与转向</a>　<span class="c">跑起来之后怎么插手</span></div><div class="toc-row">第 5 章 · <a href="#ch5">会话持久化</a>　<span class="c">关掉还能接着聊</span></div><div class="toc-row">第 6 章 · <a href="#ch6">上下文压缩</a>　<span class="c">历史太长怎么办</span></div><div class="toc-row">第 7 章 · <a href="#ch7">系统提示词与技能</a>　<span class="c">让它知道自己在哪</span></div>
   </div>
 </div>
+<!-- agent-series:intro --><div class="series-bridge"><b>mini agent-1 · 1—7章</b><p>循环、工具、并发、中断、会话、上下文压缩与技能构成这里的实现。后续的请求重试、执行恢复、流式与授权在 mini agent-2 中继续展开。</p><a href="../learn-2.0/advanced-guide.zh-CN.html#ch8">继续 mini agent-2 · 第8章 →</a></div><!-- /agent-series -->
 <div class="chapter" id="ch1">
 <div class="chead"><span class="cnum">第 1 章</span><h2>Agent Loop</h2><span class="csub">把循环跑起来</span></div>
 <div class="goal"><b>目标</b>　写一个能自己连着干活的循环：问模型 → 它说要调工具 → 你执行 → 结果塞回去 → 再问一次，直到它不再要工具。</div>
@@ -3580,7 +3577,7 @@ Be concise, structured, and focused on helping the next LLM seamlessly continue 
 </div>
 </div>
 </div>
-<footer>
+<footer><!-- agent-series:ending --><div class="series-bridge"><b>从第7章继续</b><p>mini agent-2 从一次模型请求失败开始，接入重试、恢复与执行授权。它使用独立的 mini_pi.advanced 入口；这里的 mini_agent 代码继续保留。</p><a href="../learn-2.0/advanced-guide.zh-CN.html#ch8">mini agent-2 · 第8章：失败与重试 →</a></div><!-- /agent-series -->
   启动：<code>python -m mini_agent</code>　·　
   <a href="LICENSE">MIT 许可证</a> · <a href="THIRD_PARTY_NOTICES.md">引用声明</a>
 </footer>
@@ -3675,5 +3672,6 @@ Be concise, structured, and focused on helping the next LLM seamlessly continue 
 </script>
 
 </div>
+<!-- agent-series:script --><script>(()=>{const offset=()=>document.documentElement.style.setProperty('--series-offset',Math.ceil(document.querySelector('.top').getBoundingClientRect().height)+24+'px');offset();addEventListener('resize',offset);const link=document.querySelector('.series-language');const target=link.dataset.target;const sync=()=>{const url=new URL(target,location.href);url.hash=location.hash;link.href=url.href};sync();addEventListener('hashchange',sync)})();</script><!-- /agent-series -->
 </body>
 </html>

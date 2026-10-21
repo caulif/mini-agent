@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>mini agent · Build a coding agent · Implementation guide</title>
+<title>mini agent-1 · Implementation guide</title>
 <style>
 :root{
   --bg:#ffffff; --bg2:#f7f8fa; --bg3:#eef1f6; --fg:#1f2430; --dim:#5c6678;
@@ -286,23 +286,20 @@ table.plain th{color:var(--dim);font-weight:600;font-size:13.5px}
 footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--line);
   color:var(--dim);font-size:13.5px}
 </style>
+<!-- agent-series:style --><style>.series-bridge{margin:24px 0;padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--bg2);font-size:14px}.series-bridge p{margin:6px 0}.series-bridge a{font-weight:600}.series-language{font-size:13.5px;white-space:nowrap;padding:4px 8px;border-left:1px solid var(--line)}[id]{scroll-margin-top:var(--series-offset,110px)}.top nav a[aria-current="page"]{color:var(--fg);background:var(--bg3)}@media(max-width:600px){.wrap li code,.wrap p code{white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .sumfile{white-space:normal;overflow-wrap:anywhere;min-width:0;max-width:100%}.step .codewrap>summary .sumcap{white-space:normal;min-width:0}.frow{flex-wrap:wrap}.frow .fdesc{flex:1 1 200px;min-width:0}.frow .mono{overflow-wrap:anywhere;min-width:0}.frow code{white-space:normal;overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}</style><!-- /agent-series -->
 </head>
 <body>
-<header class="top">
-<div class="top-in">
-<div class="brand">mini<span> agent</span> · Rub a coding agent with your hands</div>
-<nav><a aria-current="page" href="guide.html">English</a><a href="guide.zh-CN.html" lang="zh-CN">简体中文</a></nav>
-</div>
-</header>
+<header class="top"><div class="top-in"><div class="brand">mini<span> agent-1</span> · Build a coding agent</div><nav aria-label="Series"><a href="#series-start" aria-current="page">mini agent-1</a><a href="../learn-2.0/advanced-guide.html">mini agent-2</a></nav><a class="series-language" data-target="guide.zh-CN.html" href="guide.zh-CN.html" lang="zh-CN">中文</a></div></header>
 <div class="wrap">
 <div class="hero"><p class="goal">The tutorial is in English by default, and you can switch to Chinese through the language link at the top. Source code comments, docstrings, and CLI prompts are all in English; model responses follow the user language. </p>
-<h1>mini agent</h1>
+<h1 id="series-start">mini agent-1</h1>
 <p class="lead">This tutorial draws on the source code of pi and Codex.</p>
 <div class="tree toc" style="font-size:13px">
 <div class="toc-title"><b>Directory</b></div>
 <div class="toc-row">Chapter 1 · <a href="#ch1">Agent Loop</a>　<span class="c">Run the loop</span></div><div class="toc-row">Chapter 2 · <a href="#ch2">Tools</a>　<span class="c">Give the agent a pair of hands</span></div><div class="toc-row">Chapter 3 · <a href="#ch3">change queue</a>　<span class="c">Don’t mess with writing files concurrently</span></div><div class="toc-row">Chapter 4 · <a href="#ch4">interruptions and turns</a>　<span class="c">How to intervene after running?</span></div><div class="toc-row">Chapter 5 · <a href="#ch5">Session persistence</a>　<span class="c">Even if you turn it off, you can still continue chatting.</span></div><div class="toc-row">Chapter 6 · <a href="#ch6">Context compaction</a>　<span class="c">What to do if the history is too long</span></div><div class="toc-row">Chapter 7 · <a href="#ch7">System prompts and skills</a>　<span class="c">Let it know where it is</span></div>
 </div>
 </div>
+<!-- agent-series:intro --><div class="series-bridge"><b>mini agent-1 · Chapters 1–7</b><p>This implementation covers the loop, tools, concurrency, interruption, sessions, compaction, and skills. mini agent-2 continues with request retries, execution recovery, streaming, and authorization.</p><a href="../learn-2.0/advanced-guide.html#ch8">Continue to mini agent-2 · Chapter 8 →</a></div><!-- /agent-series -->
 <div class="chapter" id="ch1">
 <div class="chead"><span class="cnum">Chapter 1</span><h2>Agent Loop</h2><span class="csub">Run the model–tool loop</span></div>
 <div class="goal"><b>Goal</b> Write a loop that requests a model response, executes requested tools, appends their results, and repeats until no tool calls remain.</div>
@@ -3580,7 +3577,8 @@ Be concise, structured, and focused on helping the next LLM seamlessly continue 
 </div>
 </div>
 </div>
-<footer> Start:<code>python -m mini_agent</code>　·　
+<footer><!-- agent-series:ending --><div class="series-bridge"><b>After Chapter 7</b><p>mini agent-2 starts with a failed model request and connects retries, recovery, and authorization. It uses the separate mini_pi.advanced entry point; the mini_agent code here remains available.</p><a href="../learn-2.0/advanced-guide.html#ch8">mini agent-2 · Chapter 8: Failures and retries →</a></div><!-- /agent-series -->
+ Start:<code>python -m mini_agent</code>　·　
  <a href="LICENSE">MIT license</a> · <a href="THIRD_PARTY_NOTICES.md">Reference statement</a>
 </footer>
 <script>
@@ -3673,5 +3671,6 @@ Be concise, structured, and focused on helping the next LLM seamlessly continue 
 })();
 </script>
 </div>
+<!-- agent-series:script --><script>(()=>{const offset=()=>document.documentElement.style.setProperty('--series-offset',Math.ceil(document.querySelector('.top').getBoundingClientRect().height)+24+'px');offset();addEventListener('resize',offset);const link=document.querySelector('.series-language');const target=link.dataset.target;const sync=()=>{const url=new URL(target,location.href);url.hash=location.hash;link.href=url.href};sync();addEventListener('hashchange',sync)})();</script><!-- /agent-series -->
 </body>
 </html>
