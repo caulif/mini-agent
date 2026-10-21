@@ -1,0 +1,1510 @@
+{
+  "advanced-guide.zh-CN.html": [
+    {
+      "chapter": 8,
+      "path": "mini_agent/config.py",
+      "start": 47,
+      "end": 51,
+      "kind": "snippet",
+      "symbol": "CONFIG.update",
+      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 6,
+      "end": 24,
+      "kind": "snippet",
+      "symbol": "RequestFailure",
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 38,
+      "end": 67,
+      "kind": "snippet",
+      "symbol": "run_with_retry",
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 67,
+      "end": 96,
+      "kind": "snippet",
+      "symbol": "post_json",
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 34,
+      "end": 64,
+      "kind": "snippet",
+      "symbol": "validate_response",
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/llm.py",
+      "start": 14,
+      "end": 45,
+      "kind": "snippet",
+      "symbol": "call_llm",
+      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry_selfcheck.py",
+      "start": 174,
+      "end": 194,
+      "kind": "snippet",
+      "symbol": "TransportChecks.test_full_agent_does_not_replay_tool",
+      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/config.py",
+      "start": 1,
+      "end": 51,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 1,
+      "end": 67,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 1,
+      "end": 96,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/llm.py",
+      "start": 1,
+      "end": 99,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry_selfcheck.py",
+      "start": 1,
+      "end": 223,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 69,
+      "end": 74,
+      "kind": "snippet",
+      "symbol": "Journal.append",
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/runtime.py",
+      "start": 38,
+      "end": 53,
+      "kind": "snippet",
+      "symbol": "Runtime._tool",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 76,
+      "end": 123,
+      "kind": "snippet",
+      "symbol": "Journal.restore",
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 142,
+      "end": 153,
+      "kind": "snippet",
+      "symbol": "AdvancedChecks.test_real_crash_unknown_blocks_then_explicit_ack",
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 1,
+      "end": 123,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/runtime.py",
+      "start": 1,
+      "end": 76,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 90,
+      "end": 111,
+      "kind": "snippet",
+      "symbol": "call_stream",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 16,
+      "end": 60,
+      "kind": "snippet",
+      "symbol": "collect_stream.consume",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 12,
+      "end": 87,
+      "kind": "snippet",
+      "symbol": "collect_stream",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/runtime.py",
+      "start": 23,
+      "end": 36,
+      "kind": "snippet",
+      "symbol": "Runtime._request",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 1,
+      "end": 111,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 8,
+      "end": 18,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.__init__",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 45,
+      "end": 54,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.submit",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 29,
+      "end": 43,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.path",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 77,
+      "end": 84,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools._write",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 1,
+      "end": 96,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 24,
+      "end": 34,
+      "kind": "snippet",
+      "symbol": "evaluate.provider",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 13,
+      "end": 62,
+      "kind": "snippet",
+      "symbol": "evaluate",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 65,
+      "end": 76,
+      "kind": "snippet",
+      "symbol": "main",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 281,
+      "end": 288,
+      "kind": "snippet",
+      "symbol": "AdvancedChecks.test_evaluation_records_runtime_failures",
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 1,
+      "end": 80,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 1,
+      "end": 292,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/runtime.py",
+      "start": 12,
+      "end": 21,
+      "kind": "snippet",
+      "symbol": "Runtime.__init__",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/runtime.py",
+      "start": 55,
+      "end": 76,
+      "kind": "snippet",
+      "symbol": "Runtime.run",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/permissions.py",
+      "start": 20,
+      "end": 23,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.register",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/advanced.py",
+      "start": 11,
+      "end": 66,
+      "kind": "snippet",
+      "symbol": "main",
+      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/agent.py",
+      "start": 1,
+      "end": 187,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "546226cb7e29008881fd555d1593a78d07d7f3e2ce51d03e90875d4665035022"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/advanced.py",
+      "start": 1,
+      "end": 70,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
+    }
+  ],
+  "guide.zh-CN.html": [
+    {
+      "path": "mini_agent/config.py",
+      "start": 4,
+      "end": 35,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 1,
+      "end": 11,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 14,
+      "end": 45,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 48,
+      "end": 57,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 1,
+      "end": 7,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 13,
+      "end": 35,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 23,
+      "end": 39,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 71,
+      "end": 93,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 125,
+      "end": 159,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 1,
+      "end": 8,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 229,
+      "end": 270,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 1,
+      "end": 5,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 8,
+      "end": 60,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 63,
+      "end": 68,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 71,
+      "end": 119,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 122,
+      "end": 139,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 142,
+      "end": 178,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 102,
+      "end": 104,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 181,
+      "end": 197,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 51,
+      "end": 77,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 5,
+      "end": 13,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 16,
+      "end": 22,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 15,
+      "end": 25,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 142,
+      "end": 178,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 162,
+      "end": 163,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 154,
+      "end": 157,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 110,
+      "end": 122,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 225,
+      "end": 226,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 38,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/control.py",
+      "start": 4,
+      "end": 26,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/control.py",
+      "start": 33,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 106,
+      "end": 120,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 140,
+      "end": 152,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 65,
+      "end": 77,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 15,
+      "end": 19,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 42,
+      "end": 45,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 202,
+      "end": 226,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 104,
+      "end": 150,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 9,
+      "end": 21,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 23,
+      "end": 41,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 43,
+      "end": 56,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 63,
+      "end": 71,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 80,
+      "end": 84,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 83,
+      "end": 94,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 89,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 104,
+      "end": 126,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 152,
+      "end": 180,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 20,
+      "end": 42,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 45,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 51,
+      "end": 63,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 97,
+      "end": 114,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 5,
+      "end": 17,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 66,
+      "end": 94,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 167,
+      "end": 187,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 122,
+      "end": 123,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 91,
+      "end": 102,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 188,
+      "end": 193,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 6,
+      "end": 19,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 22,
+      "end": 28,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 31,
+      "end": 62,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 65,
+      "end": 66,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 181,
+      "end": 187,
+      "kind": "source"
+    }
+  ],
+  "advanced-guide.html": [
+    {
+      "chapter": 8,
+      "path": "mini_agent/config.py",
+      "start": 47,
+      "end": 51,
+      "kind": "snippet",
+      "symbol": "CONFIG.update",
+      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 6,
+      "end": 24,
+      "kind": "snippet",
+      "symbol": "RequestFailure",
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 38,
+      "end": 67,
+      "kind": "snippet",
+      "symbol": "run_with_retry",
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 67,
+      "end": 96,
+      "kind": "snippet",
+      "symbol": "post_json",
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 34,
+      "end": 64,
+      "kind": "snippet",
+      "symbol": "validate_response",
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/llm.py",
+      "start": 14,
+      "end": 45,
+      "kind": "snippet",
+      "symbol": "call_llm",
+      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry_selfcheck.py",
+      "start": 174,
+      "end": 194,
+      "kind": "snippet",
+      "symbol": "TransportChecks.test_full_agent_does_not_replay_tool",
+      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/config.py",
+      "start": 1,
+      "end": 51,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry.py",
+      "start": 1,
+      "end": 67,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/transport.py",
+      "start": 1,
+      "end": 96,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/llm.py",
+      "start": 1,
+      "end": 99,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
+    },
+    {
+      "chapter": 8,
+      "path": "mini_agent/retry_selfcheck.py",
+      "start": 1,
+      "end": 223,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 69,
+      "end": 74,
+      "kind": "snippet",
+      "symbol": "Journal.append",
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/runtime.py",
+      "start": 38,
+      "end": 53,
+      "kind": "snippet",
+      "symbol": "Runtime._tool",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 76,
+      "end": 123,
+      "kind": "snippet",
+      "symbol": "Journal.restore",
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 142,
+      "end": 153,
+      "kind": "snippet",
+      "symbol": "AdvancedChecks.test_real_crash_unknown_blocks_then_explicit_ack",
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/journal.py",
+      "start": 1,
+      "end": 123,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
+    },
+    {
+      "chapter": 9,
+      "path": "mini_agent/runtime.py",
+      "start": 1,
+      "end": 76,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 90,
+      "end": 111,
+      "kind": "snippet",
+      "symbol": "call_stream",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 16,
+      "end": 60,
+      "kind": "snippet",
+      "symbol": "collect_stream.consume",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 12,
+      "end": 87,
+      "kind": "snippet",
+      "symbol": "collect_stream",
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/runtime.py",
+      "start": 23,
+      "end": 36,
+      "kind": "snippet",
+      "symbol": "Runtime._request",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 10,
+      "path": "mini_agent/streaming.py",
+      "start": 1,
+      "end": 111,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 8,
+      "end": 18,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.__init__",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 45,
+      "end": 54,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.submit",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 29,
+      "end": 43,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.path",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 77,
+      "end": 84,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools._write",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 11,
+      "path": "mini_agent/permissions.py",
+      "start": 1,
+      "end": 96,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 24,
+      "end": 34,
+      "kind": "snippet",
+      "symbol": "evaluate.provider",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 13,
+      "end": 62,
+      "kind": "snippet",
+      "symbol": "evaluate",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 65,
+      "end": 76,
+      "kind": "snippet",
+      "symbol": "main",
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 281,
+      "end": 288,
+      "kind": "snippet",
+      "symbol": "AdvancedChecks.test_evaluation_records_runtime_failures",
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/evaluation.py",
+      "start": 1,
+      "end": 80,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
+    },
+    {
+      "chapter": 12,
+      "path": "mini_agent/advanced_selfcheck.py",
+      "start": 1,
+      "end": 292,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/runtime.py",
+      "start": 12,
+      "end": 21,
+      "kind": "snippet",
+      "symbol": "Runtime.__init__",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/runtime.py",
+      "start": 55,
+      "end": 76,
+      "kind": "snippet",
+      "symbol": "Runtime.run",
+      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/permissions.py",
+      "start": 20,
+      "end": 23,
+      "kind": "snippet",
+      "symbol": "WorkspaceTools.register",
+      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/advanced.py",
+      "start": 11,
+      "end": 66,
+      "kind": "snippet",
+      "symbol": "main",
+      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/agent.py",
+      "start": 1,
+      "end": 187,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "546226cb7e29008881fd555d1593a78d07d7f3e2ce51d03e90875d4665035022"
+    },
+    {
+      "chapter": 13,
+      "path": "mini_agent/advanced.py",
+      "start": 1,
+      "end": 70,
+      "kind": "file",
+      "symbol": null,
+      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
+    }
+  ],
+  "guide.html": [
+    {
+      "path": "mini_agent/config.py",
+      "start": 4,
+      "end": 35,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 1,
+      "end": 11,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 14,
+      "end": 45,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 48,
+      "end": 57,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 1,
+      "end": 7,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 13,
+      "end": 35,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 23,
+      "end": 39,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 71,
+      "end": 93,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 125,
+      "end": 159,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 1,
+      "end": 8,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 229,
+      "end": 270,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 1,
+      "end": 5,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 8,
+      "end": 60,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 63,
+      "end": 68,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 71,
+      "end": 119,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 122,
+      "end": 139,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 142,
+      "end": 178,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 102,
+      "end": 104,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 181,
+      "end": 197,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 51,
+      "end": 77,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 5,
+      "end": 13,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 16,
+      "end": 22,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/mutation_queue.py",
+      "start": 15,
+      "end": 25,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/tools.py",
+      "start": 142,
+      "end": 178,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 162,
+      "end": 163,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 154,
+      "end": 157,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 110,
+      "end": 122,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 225,
+      "end": 226,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 38,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/control.py",
+      "start": 4,
+      "end": 26,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/control.py",
+      "start": 33,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 106,
+      "end": 120,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 140,
+      "end": 152,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 65,
+      "end": 77,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 15,
+      "end": 19,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/llm.py",
+      "start": 42,
+      "end": 45,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 202,
+      "end": 226,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 104,
+      "end": 150,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 9,
+      "end": 21,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 23,
+      "end": 41,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 43,
+      "end": 56,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 63,
+      "end": 71,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 80,
+      "end": 84,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/session.py",
+      "start": 83,
+      "end": 94,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 89,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 104,
+      "end": 126,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 152,
+      "end": 180,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 20,
+      "end": 42,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 45,
+      "end": 48,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 51,
+      "end": 63,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 97,
+      "end": 114,
+      "kind": "inline"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 5,
+      "end": 17,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/compaction.py",
+      "start": 66,
+      "end": 94,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 167,
+      "end": 187,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/agent.py",
+      "start": 122,
+      "end": 123,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 91,
+      "end": 102,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 188,
+      "end": 193,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 6,
+      "end": 19,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 22,
+      "end": 28,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 31,
+      "end": 62,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/prompt.py",
+      "start": 65,
+      "end": 66,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 52,
+      "end": 61,
+      "kind": "source"
+    },
+    {
+      "path": "mini_agent/cli.py",
+      "start": 181,
+      "end": 187,
+      "kind": "source"
+    }
+  ]
+}

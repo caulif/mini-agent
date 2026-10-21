@@ -1,0 +1,676 @@
+{
+  "config-10-53": {
+    "path": "mini_agent/config.py",
+    "first": [
+      "CONFIG = {",
+      "    \"base_url\": os.environ.get(\"OPENAI_BASE_URL\", \"https://api.openai.com/v1\"),"
+    ],
+    "last": [
+      "            'Missing OPENAI_API_KEY.\\nSet the environment variables, for example:\\n  $env:OPENAI_BASE_URL=\"https://api.openai.com/v1\"\\n  $env:OPENAI_API_KEY=\"sk-...\"\\n  $env:MODEL_ID=\"gpt-4o-mini\"\\n'",
+      "        )"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "llm-24-75": {
+    "path": "mini_agent/llm.py",
+    "scope": "call_llm",
+    "symbols": [
+      "call_llm",
+      "call_llm"
+    ]
+  },
+  "llm-78-93": {
+    "path": "mini_agent/llm.py",
+    "symbols": [
+      "extract_message",
+      "extract_tool_calls"
+    ]
+  },
+  "tools-101-124": {
+    "path": "mini_agent/tools.py",
+    "scope": "tool_bash",
+    "symbols": [
+      "tool_bash",
+      "tool_bash"
+    ]
+  },
+  "agent-195-245": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "        emit(\"request\", turn=turn, history_len=len(messages))"
+    ],
+    "last": [
+      "            _append(messages, {\"role\": \"tool\", **r}, on_append)",
+      "    return messages"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-270-312": {
+    "path": "mini_agent/cli.py",
+    "symbols": [
+      "build_parser",
+      "main"
+    ]
+  },
+  "tools-21-74": {
+    "path": "mini_agent/tools.py",
+    "first": [
+      "def _function(name, description, properties, required):",
+      "    return {"
+    ],
+    "last": [
+      "    ),",
+      "]"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "tools-81-90": {
+    "path": "mini_agent/tools.py",
+    "scope": "safe_path",
+    "symbols": [
+      "safe_path",
+      "safe_path"
+    ]
+  },
+  "tools-101-152": {
+    "path": "mini_agent/tools.py",
+    "symbols": [
+      "tool_bash",
+      "tool_read"
+    ]
+  },
+  "tools-155-173": {
+    "path": "mini_agent/tools.py",
+    "scope": "tool_write",
+    "symbols": [
+      "tool_write",
+      "tool_write"
+    ]
+  },
+  "tools-176-217": {
+    "path": "mini_agent/tools.py",
+    "scope": "tool_edit",
+    "symbols": [
+      "tool_edit",
+      "tool_edit"
+    ]
+  },
+  "tools-226-246": {
+    "path": "mini_agent/tools.py",
+    "first": [
+      "HANDLERS = {",
+      "    \"bash\": tool_bash,"
+    ],
+    "last": [
+      "    except Exception as e:",
+      "        return f\"Error: {type(e).__name__}: {e}\""
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-86-119": {
+    "path": "mini_agent/agent.py",
+    "scope": "_run_one",
+    "symbols": [
+      "_run_one",
+      "_run_one"
+    ]
+  },
+  "mutation_queue-13-25": {
+    "path": "mini_agent/mutation_queue.py",
+    "scope": "FileMutationQueue",
+    "first": [
+      "class FileMutationQueue:",
+      "    def __init__(self):"
+    ],
+    "last": [
+      "    def _key_for(path):",
+      "        return os.path.realpath(os.path.abspath(path))"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "mutation_queue-29-36": {
+    "path": "mini_agent/mutation_queue.py",
+    "scope": "FileMutationQueue.run",
+    "first": [
+      "        key = self._key_for(path)",
+      "        with self._registry:"
+    ],
+    "last": [
+      "                lock = threading.Lock()",
+      "                self._locks[key] = lock"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "mutation_queue-27-40": {
+    "path": "mini_agent/mutation_queue.py",
+    "scope": "FileMutationQueue.run",
+    "symbols": [
+      "FileMutationQueue.run",
+      "FileMutationQueue.run"
+    ]
+  },
+  "agent-69-83": {
+    "path": "mini_agent/agent.py",
+    "scope": "execute_tool_calls",
+    "symbols": [
+      "execute_tool_calls",
+      "execute_tool_calls"
+    ]
+  },
+  "control-11-40": {
+    "path": "mini_agent/control.py",
+    "symbols": [
+      "Aborted",
+      "Signal.check"
+    ]
+  },
+  "control-48-70": {
+    "path": "mini_agent/control.py",
+    "scope": "SteeringQueue",
+    "symbols": [
+      "SteeringQueue",
+      "SteeringQueue.drain"
+    ]
+  },
+  "agent-168-186": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "    turn = 0",
+      "    while True:"
+    ],
+    "last": [
+      "            emit(\"max_turns\", limit=max_turns)",
+      "            break"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-215-236": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "        if signal.aborted:",
+      "            for c in calls:"
+    ],
+    "last": [
+      "            emit(\"aborted\", reason=signal.reason)",
+      "            break"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 1
+  },
+  "agent-104-119": {
+    "path": "mini_agent/agent.py",
+    "scope": "_run_one",
+    "first": [
+      "    emit(\"tool_start\", name=name, input=inp)",
+      "    try:"
+    ],
+    "last": [
+      "    emit(\"tool_end\", name=name, output=output)",
+      "    return {\"tool_call_id\": call.get(\"id\"), \"content\": output}"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "llm-31-38": {
+    "path": "mini_agent/llm.py",
+    "scope": "call_llm",
+    "first": [
+      "    if signal is not None:",
+      "        signal.check()"
+    ],
+    "last": [
+      "    system_text = SYSTEM_PROMPT if system is None else system",
+      "    full_messages = [{\"role\": \"system\", \"content\": system_text}] + messages"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "llm-68-75": {
+    "path": "mini_agent/llm.py",
+    "scope": "call_llm",
+    "first": [
+      "    if signal is not None:",
+      "        signal.check()"
+    ],
+    "last": [
+      "        signal.check()",
+      "    return data"
+    ],
+    "first_occurrence": 1,
+    "last_occurrence": 0
+  },
+  "cli-239-263": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.repl",
+    "symbols": [
+      "App.repl",
+      "App.repl"
+    ]
+  },
+  "cli-135-183": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.run_turn",
+    "symbols": [
+      "App.run_turn",
+      "App.run_turn"
+    ]
+  },
+  "session-17-34": {
+    "path": "mini_agent/session.py",
+    "scope": "Session",
+    "first": [
+      "class Session:",
+      "    def __init__(self, session_id, messages, path):"
+    ],
+    "last": [
+      "        path = os.path.join(directory, f\"{session_id}.jsonl\")",
+      "        return cls(session_id, [], path)"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "session-36-55": {
+    "path": "mini_agent/session.py",
+    "scope": "Session",
+    "first": [
+      "    @classmethod",
+      "    def load(cls, path):"
+    ],
+    "last": [
+      "            print('[Warning] Skipped {0} corrupt lines'.format(skipped))",
+      "        return cls(session_id, messages, path)"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "session-59-80": {
+    "path": "mini_agent/session.py",
+    "scope": "Session",
+    "symbols": [
+      "Session.append",
+      "Session.persist"
+    ]
+  },
+  "session-93-106": {
+    "path": "mini_agent/session.py",
+    "scope": "Session",
+    "first": [
+      "        self.messages[:] = messages",
+      "        tmp = self.path + \".tmp\""
+    ],
+    "last": [
+      "    def stats(self):",
+      "        return {"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-133-137": {
+    "path": "mini_agent/agent.py",
+    "scope": "_append",
+    "symbols": [
+      "_append",
+      "_append"
+    ]
+  },
+  "session-119-131": {
+    "path": "mini_agent/session.py",
+    "first": [
+      "    files = [",
+      "        os.path.join(directory, n)"
+    ],
+    "last": [
+      "    files = list_sessions(session_dir)",
+      "    return files[0] if files else None"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-74-114": {
+    "path": "mini_agent/cli.py",
+    "scope": "App",
+    "symbols": [
+      "App.__init__",
+      "App._find_session_path"
+    ]
+  },
+  "cli-135-158": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.run_turn",
+    "first": [
+      "    def run_turn(self, user_text):",
+      "        self.signal.reset()"
+    ],
+    "last": [
+      "            finally:",
+      "                done.set()"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-187-215": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.handle_command",
+    "first": [
+      "    def handle_command(self, line):",
+      "        parts = line.split(maxsplit=1)"
+    ],
+    "last": [
+      "                except SystemExit as e:",
+      "                    print(e)"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "compaction-32-59": {
+    "path": "mini_agent/compaction.py",
+    "symbols": [
+      "estimate_tokens",
+      "needs_compaction"
+    ]
+  },
+  "compaction-66-71": {
+    "path": "mini_agent/compaction.py",
+    "scope": "is_turn_start",
+    "symbols": [
+      "is_turn_start",
+      "is_turn_start"
+    ]
+  },
+  "compaction-74-91": {
+    "path": "mini_agent/compaction.py",
+    "scope": "find_cut_index",
+    "symbols": [
+      "find_cut_index",
+      "find_cut_index"
+    ]
+  },
+  "compaction-13-25": {
+    "path": "mini_agent/compaction.py",
+    "first": [
+      "SUMMARY_INSTRUCTION = \"\"\"\\",
+      "You are compacting a coding session so it can continue in a fresh context."
+    ],
+    "last": [
+      "Write it as notes to your future self, not as prose for a human.",
+      "\"\"\""
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "compaction-98-135": {
+    "path": "mini_agent/compaction.py",
+    "symbols": [
+      "compact",
+      "summarize"
+    ]
+  },
+  "agent-256-280": {
+    "path": "mini_agent/agent.py",
+    "scope": "make_compaction_hook",
+    "first": [
+      "    from . import compaction as _compaction",
+      "    def hook(messages):"
+    ],
+    "last": [
+      "            )",
+      "    return hook"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-188-193": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "        if before_request is not None:",
+      "            before_request(messages)"
+    ],
+    "last": [
+      "        if before_request is not None:",
+      "            before_request(messages)"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-116-131": {
+    "path": "mini_agent/cli.py",
+    "scope": "App._make_before_request",
+    "symbols": [
+      "App._make_before_request",
+      "App._make_before_request"
+    ]
+  },
+  "cli-223-228": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.handle_command",
+    "first": [
+      "        elif cmd == \"/compact\":",
+      "            before = compaction.estimate_tokens(self.session.messages)"
+    ],
+    "last": [
+      "            after = compaction.estimate_tokens(compacted)",
+      "            print('{0}Compacted: {1} → {2} tokens{3}'.format(DIM, before, after, RESET))"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "prompt-16-29": {
+    "path": "mini_agent/prompt.py",
+    "first": [
+      "BASE_PROMPT = \"\"\"\\",
+      "You are a coding agent working in a terminal."
+    ],
+    "last": [
+      "- Use the user's language.",
+      "\"\"\""
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "prompt-32-39": {
+    "path": "mini_agent/prompt.py",
+    "scope": "environment_block",
+    "symbols": [
+      "environment_block",
+      "environment_block"
+    ]
+  },
+  "prompt-51-87": {
+    "path": "mini_agent/prompt.py",
+    "first": [
+      "SKILLS_DIRNAME = \"skills\"",
+      "def load_skills(root=None):"
+    ],
+    "last": [
+      "        parts.append(f\"\\n--- {skill['name']} ---\\n{skill['body']}\")",
+      "    return \"\\n\".join(parts) + \"\\n\""
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "prompt-90-94": {
+    "path": "mini_agent/prompt.py",
+    "scope": "build_system_prompt",
+    "symbols": [
+      "build_system_prompt",
+      "build_system_prompt"
+    ]
+  },
+  "cli-74-83": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.__init__",
+    "symbols": [
+      "App.__init__",
+      "App.__init__"
+    ]
+  },
+  "cli-216-222": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.handle_command",
+    "first": [
+      "        elif cmd == \"/skills\":",
+      "            if not self.skills:"
+    ],
+    "last": [
+      "            total = len(prompt.build_system_prompt(self.skills))",
+      "            print('{0}System prompt: {1} characters total{2}'.format(DIM, total, RESET))"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "llm-9-21": {
+    "path": "mini_agent/llm.py",
+    "first": [
+      "import json",
+      "import urllib.request"
+    ],
+    "last": [
+      "    \"Use the provided tools to solve the task. Act, don't explain.\"",
+      ")"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-10-17": {
+    "path": "mini_agent/agent.py",
+    "first": [
+      "from concurrent.futures import ThreadPoolExecutor",
+      "import json"
+    ],
+    "last": [
+      "from . import tools as toolbox",
+      "from .control import Aborted, Signal"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-30-54": {
+    "path": "mini_agent/agent.py",
+    "symbols": [
+      "default_emit",
+      "_brief"
+    ]
+  },
+  "tools-36-53": {
+    "path": "mini_agent/tools.py",
+    "first": [
+      "TOOLS = [",
+      "    _function("
+    ],
+    "last": [
+      "        [\"path\"],",
+      "    ),"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-10-17": {
+    "path": "mini_agent/cli.py",
+    "first": [
+      "import argparse",
+      "import os"
+    ],
+    "last": [
+      "from . import compaction, prompt, session as session_mod",
+      "from .config import CONFIG, require_api_key, setup_console"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "tools-8-12": {
+    "path": "mini_agent/tools.py",
+    "first": [
+      "import os",
+      "import subprocess"
+    ],
+    "last": [
+      "from .config import BLOCKED_PATTERNS, CONFIG",
+      "from .mutation_queue import mutation_queue"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-164-166": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "    tools = toolbox.TOOLS if tools is None else tools",
+      "    emit = emit or default_emit"
+    ],
+    "last": [
+      "    emit = emit or default_emit",
+      "    signal = signal or Signal()"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "agent-248-250": {
+    "path": "mini_agent/agent.py",
+    "scope": "make_executor",
+    "symbols": [
+      "make_executor",
+      "make_executor"
+    ]
+  },
+  "agent-241-243": {
+    "path": "mini_agent/agent.py",
+    "scope": "agent_loop",
+    "first": [
+      "        results = execute_tool_calls(calls, signal=signal, emit=emit, executor=executor,",
+      "                                     tool_runner=tool_runner)"
+    ],
+    "last": [
+      "        for r in results:",
+      "            _append(messages, {\"role\": \"tool\", **r}, on_append)"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-142-154": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.run_turn.worker",
+    "first": [
+      "        def worker():",
+      "            try:"
+    ],
+    "last": [
+      "                    before_request=self.before_request,",
+      "                )"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "cli-262-263": {
+    "path": "mini_agent/cli.py",
+    "scope": "App.repl",
+    "first": [
+      "        self.executor.shutdown(wait=False)",
+      "        print('{0}Session saved: {1}{2}'.format(DIM, self.session.path, RESET))"
+    ],
+    "last": [
+      "        self.executor.shutdown(wait=False)",
+      "        print('{0}Session saved: {1}{2}'.format(DIM, self.session.path, RESET))"
+    ],
+    "first_occurrence": 0,
+    "last_occurrence": 0
+  },
+  "compaction-138-157": {
+    "path": "mini_agent/compaction.py",
+    "scope": "_render",
+    "symbols": [
+      "_render",
+      "_render"
+    ]
+  }
+}

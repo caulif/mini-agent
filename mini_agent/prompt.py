@@ -1,18 +1,8 @@
-# -*- coding: utf-8 -*-
-"""System-prompt assembly (chapter 7).
-
-Combine stable behavior instructions, a current environment snapshot, and
-optional Markdown skills. Keep essential instructions first and project
-knowledge last. The CLI builds this prompt once when App is initialized."""
-
 import datetime
 import os
 import platform
 
 
-# Layer 1: stable behavior instructions come first.
-# These instructions define the agent's overall working style.
-# They influence every turn, so keep changes deliberate.
 BASE_PROMPT = """\
 You are a coding agent working in a terminal.
 
@@ -30,7 +20,6 @@ How you talk:
 
 
 def environment_block():
-    """Read the working directory, platform, and date when called."""
     return (
         "\nEnvironment:\n"
         f"- working directory: {os.getcwd()}\n"
@@ -39,23 +28,10 @@ def environment_block():
     )
 
 
-# Layer 3: optional Markdown skills loaded from disk.
-#
-# A skill is a Markdown file describing how to handle a task.
-# For example, git-commit.md can describe commit-message conventions.
-# The agent receives this project-specific knowledge in its prompt.
-#
-# Markdown keeps project rules independent of Python implementation.
-# Different working directories can provide different skills.
-
 SKILLS_DIRNAME = "skills"
 
 
 def load_skills(root=None):
-    """Load nonempty Markdown files from the working directory's skills folder.
-    
-    Return dictionaries with name and body. A missing directory is allowed;
-    this teaching implementation skips individual unreadable files."""
     root = root or os.getcwd()
     skills_dir = os.path.join(root, SKILLS_DIRNAME)
     if not os.path.isdir(skills_dir):
@@ -70,14 +46,13 @@ def load_skills(root=None):
             with open(path, "r", encoding="utf-8", errors="replace") as f:
                 body = f.read().strip()
         except OSError:
-            continue                       # Skip an unreadable optional skill file.
+            continue
         if body:
             skills.append({"name": os.path.splitext(name)[0], "body": body})
     return skills
 
 
 def skills_block(skills=None, root=None):
-    """Render skill contents, returning an empty string when no skills exist."""
     skills = load_skills(root) if skills is None else skills
     if not skills:
         return ""
@@ -88,7 +63,4 @@ def skills_block(skills=None, root=None):
 
 
 def build_system_prompt(skills=None, root=None):
-    """Combine behavior instructions, environment information, and skills.
-    
-    Pass skills=[] to disable skills, or None to load them from disk."""
     return BASE_PROMPT + environment_block() + skills_block(skills, root)

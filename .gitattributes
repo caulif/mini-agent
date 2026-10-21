@@ -1,0 +1,6 @@
+mini_agent/*.py text eol=lf
+scripts/*.py text eol=lf
+docs/** text eol=lf
+guide*.html text eol=lf
+advanced-guide*.html text eol=lf
+README*.md text eol=lf

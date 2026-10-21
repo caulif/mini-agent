@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Terminal interaction for the teaching agent.
-
-Read user input, invoke the loop, and render its events. The agent runs in a
-background thread while the main thread accepts follow-up input or Ctrl+C.
-Follow-up text enters the steering queue for the next model request.
-Agent behavior lives in agent.py and tools.py, not in this interface."""
-
-
 import argparse
 import os
 import sys
@@ -17,7 +8,7 @@ from . import compaction, prompt, session as session_mod
 from .config import CONFIG, require_api_key, setup_console
 from .control import Signal, SteeringQueue
 
-# ANSI terminal colors (supported by Windows 10+ terminals).
+
 DIM = "\033[2m"
 BOLD = "\033[1m"
 CYAN = "\033[36m"
@@ -29,16 +20,9 @@ RESET = "\033[0m"
 HELP_TEXT = 'Available commands:\n  /help            Show this help\n  /new             Start a new conversation (keep the current one on disk)\n  /list            List saved sessions\n  /resume <id>     Switch to a saved session\n  /skills          List loaded skill files\n  /compact         Compact the context now\n  /stats           Show current session statistics\n  /exit            Exit (or press Ctrl+C)\n'
 
 
-# ══════════════════════════════════════════════════════════════
-# Event rendering.
-# ══════════════════════════════════════════════════════════════
-
 def make_renderer(verbose_tools=False):
-    """Create a terminal renderer for the agent's emit callback."""
-
     def render(kind, **kw):
         if kind == "text":
-            # Distinguish the model's answer from tool output.
             print(f"\n{BOLD}{kw['text']}{RESET}")
         elif kind == "tool_start":
             args = agent_mod._brief(kw.get("input"))
@@ -64,13 +48,7 @@ def make_renderer(verbose_tools=False):
     return render
 
 
-# ══════════════════════════════════════════════════════════════
-# Conversation application.
-# ══════════════════════════════════════════════════════════════
-
 class App:
-    """Assemble the session, control signals, executor, prompts, and renderer."""
-
     def __init__(self, args):
         self.args = args
         self.session = self._open_session()
@@ -82,10 +60,7 @@ class App:
         self.system_prompt = prompt.build_system_prompt(self.skills)
         self.before_request = self._make_before_request()
 
-    # Assembly.
-
     def _open_session(self):
-        """Start a new session, continue the latest, or resume a selected ID."""
         if self.args.resume:
             path = self._find_session_path(self.args.resume)
             loaded = session_mod.Session.load(path)
@@ -107,17 +82,13 @@ class App:
         path = os.path.join(directory, f"{session_id}.jsonl")
         if os.path.exists(path):
             return path
-        # Allow a session ID prefix as a convenience.
+
         for candidate in session_mod.list_sessions(directory):
             if os.path.basename(candidate).startswith(session_id):
                 return candidate
         raise SystemExit('Session not found: {0} (use /list to see available sessions)'.format(session_id))
 
     def _make_before_request(self):
-        """Wrap automatic compaction and persist replaced history.
-        
-        The append hook only saves new messages. Compaction replaces old messages,
-        so the session file must be rewritten rather than appended to."""
         compact_hook = agent_mod.make_compaction_hook(
             signal=self.signal, emit=self.render
         )
@@ -130,10 +101,7 @@ class App:
 
         return before_request
 
-    # Run one turn.
-
     def run_turn(self, user_text):
-        """Run user input in a background thread while accepting follow-ups."""
         self.signal.reset()
         self.session.append("user", user_text)
 
@@ -149,8 +117,8 @@ class App:
                     max_turns=self.args.max_turns,
                     emit=self.render,
                     executor=self.executor,
-                    on_append=self.session.persist,           # Chapter 5: persist only; the loop already appended in memory.
-                    before_request=self.before_request,      # Chapter 6: compact before requests.
+                    on_append=self.session.persist,
+                    before_request=self.before_request,
                 )
             except Exception as e:
                 print('{0}[Error] {1}: {2}{3}'.format(RED, type(e).__name__, e, RESET))
@@ -160,7 +128,6 @@ class App:
         thread = threading.Thread(target=worker, daemon=True, name="agent")
         thread.start()
 
-        # Keep reading input while the background agent runs.
         while not done.is_set():
             try:
                 line = input('{0}(Running… add instructions, Ctrl+C to interrupt){1} '.format(DIM, RESET)).strip()
@@ -175,14 +142,12 @@ class App:
             if not line:
                 continue
             if line.startswith("/"):
-                self.handle_command(line)          # Handle slash commands immediately.
+                self.handle_command(line)
             else:
-                self.steering.push(line)           # Queue other input for the next model request.
+                self.steering.push(line)
                 print('{0}  ↳ Queued for the next model call{1}'.format(YELLOW, RESET))
 
         thread.join(timeout=1)
-
-    # Slash commands.
 
     def handle_command(self, line):
         parts = line.split(maxsplit=1)
@@ -234,8 +199,6 @@ class App:
         else:
             print('Unknown command {0}; use /help for help'.format(cmd))
 
-    # Interactive loop.
-
     def repl(self):
         print('{0}mini_agent{1} {2}(/help for commands, Ctrl+C to interrupt, /exit to quit){3}'.format(BOLD, RESET, DIM, RESET))
         print('{0}Working directory: {1}{2}'.format(DIM, os.getcwd(), RESET))
@@ -263,10 +226,6 @@ class App:
         print('{0}Session saved: {1}{2}'.format(DIM, self.session.path, RESET))
 
 
-# ══════════════════════════════════════════════════════════════
-# Entry point.
-# ══════════════════════════════════════════════════════════════
-
 def build_parser():
     p = argparse.ArgumentParser(
         prog="mini_agent",
@@ -293,7 +252,6 @@ def main(argv=None):
     require_api_key()
 
     if args.oneshot:
-        # One-shot mode runs the task and exits for script use.
         app = App(args)
         app.session.append("user", args.oneshot)
         agent_mod.agent_loop(

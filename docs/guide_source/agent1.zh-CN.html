@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mini agent-1 · 实现指南</title>
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f7f8fa; --bg3:#eef1f6; --fg:#1f2430; --dim:#5c6678;
+  --line:#e3e7ef; --accent:#2563eb; --accent2:#15803d; --warn:#b45309;
+  --new:#15803d; --mod:#b45309; --code:#f8f9fb;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code,pre,.mono{font-family:"Cascadia Code",Consolas,"SF Mono",Menlo,monospace}
+
+
+header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;
+  align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.4px}
+.brand span{color:var(--accent)}
+.top nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.top nav a{padding:4px 10px;border-radius:6px;color:var(--dim);font-size:13.5px}
+.top nav a:hover{background:var(--bg3);color:var(--fg);text-decoration:none}
+
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 100px}
+.hero{padding:52px 0 30px;border-bottom:1px solid var(--line)}
+.hero h1{margin:0 0 12px;font-size:38px;letter-spacing:-.5px;line-height:1.25}
+.hero p.lead{color:var(--dim);font-size:17px;max-width:74ch;margin:0 0 22px}
+.pill{display:inline-block;padding:3px 11px;border-radius:99px;font-size:12.5px;
+  background:var(--bg3);color:var(--dim);border:1px solid var(--line);margin-right:7px}
+
+h2.sec{font-size:24px;margin:52px 0 14px;padding-bottom:8px;
+  border-bottom:1px solid var(--line)}
+h3.sub{font-size:17.5px;margin:30px 0 10px;color:var(--fg)}
+p{margin:11px 0}
+ul,ol{margin:11px 0;padding-left:22px}
+li{margin:6px 0}
+.dim{color:var(--dim)}
+
+
+.chapter{margin:56px 0 0;padding-top:30px;border-top:1px solid var(--line)}
+.chapter:first-of-type{border-top:0}
+.chead{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap;margin-bottom:4px}
+.cnum{font-size:13px;font-weight:700;color:var(--bg);background:var(--accent);
+  padding:3px 9px;border-radius:6px;letter-spacing:.5px}
+.chead h2{margin:0;font-size:28px;letter-spacing:-.3px}
+.csub{color:var(--dim);font-size:15px}
+.goal{margin:18px 0 26px;padding:15px 19px;background:var(--bg2);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+.goal b{color:var(--accent)}
+
+
+.theory{margin:18px 0 30px}
+.theory p{margin:12px 0;line-height:1.8}
+.theory ul,.theory ol{margin:12px 0;padding-left:24px}
+.theory li{margin:7px 0}
+h4.mini{margin:26px 0 10px;font-size:16px;font-weight:700;color:var(--accent);
+  display:flex;align-items:center;gap:9px}
+h4.mini::before{content:"";width:3px;height:15px;border-radius:2px;
+  background:var(--accent);flex:0 0 auto}
+.theory code,.guide code,p code,li code,td code{background:var(--bg3);
+  padding:1px 6px;border-radius:4px;font-size:.92em;color:#0a3069}
+.theory strong,.guide strong,.goal strong{font-weight:700;color:#0b1220}
+
+
+.steps{margin:16px 0 28px;display:flex;flex-direction:column;gap:14px}
+.step{background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:14px 18px 15px}
+.step h5{margin:0 0 9px;font-size:14.8px;font-weight:700;color:var(--fg);
+  display:flex;align-items:baseline;gap:8px}
+.step h5::before{content:"▸";color:var(--accent);font-size:13px}
+.step ul{margin:0;padding-left:20px}
+.step li{margin:7px 0;font-size:15px;line-height:1.75;color:#3d4757}
+.step li code{background:#fff;border:1px solid var(--line);color:#0a3069}
+
+
+.step .exnote{margin:14px 0 6px;font-size:13.5px;line-height:1.7;color:var(--dim)}
+.step pre.ascii{background:#fff;margin:6px 0 2px;font-size:12.6px}
+
+
+.step .codewrap{margin:12px 0 2px;border:1px solid var(--line);border-radius:9px;
+  overflow:hidden;background:var(--bg3)}
+.step .codewrap>summary{cursor:pointer;list-style:none;padding:10px 14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:14px;
+  font-weight:600;color:var(--fg);user-select:none}
+.step .codewrap>summary::-webkit-details-marker{display:none}
+.step .codewrap>summary .sumcap{flex:1 1 auto}
+.step .codewrap>summary .sumcap::before{content:"▸  ";color:var(--accent);
+  font-size:12px;display:inline-block;transition:transform .15s}
+.step .codewrap[open]>summary .sumcap::before{transform:rotate(90deg)}
+.step .codewrap>summary .sumhint{flex:0 0 auto;font-size:12px;font-weight:500;
+  color:var(--dim)}
+.step .codewrap[open]>summary{border-bottom:1px solid var(--line);
+  background:var(--bg2)}
+.step .codewrap[open]>summary .sumhint{display:none}
+.step .codewrap .codeblock{margin:0;border:0;border-radius:0;box-shadow:none}
+
+.step .codewrap>summary .copybtn{flex:0 0 auto;font:inherit;font-size:12px;
+  font-weight:500;line-height:1.4;padding:3px 10px;border-radius:6px;
+  border:1px solid var(--line);background:var(--bg);color:var(--dim);
+  cursor:pointer;transition:color .12s,border-color .12s,background .12s}
+.step .codewrap>summary .copybtn:hover{color:var(--accent);border-color:var(--accent);
+  background:#fff}
+.step .codewrap>summary .copybtn.done{color:var(--new);border-color:rgba(21,128,61,.45);
+  background:rgba(21,128,61,.06)}
+.step .codewrap>summary .copybtn.bad{color:#b91c1c;border-color:rgba(185,28,28,.45);
+  background:rgba(185,28,28,.06)}
+
+.step .codewrap>summary .sumfile{flex:0 0 auto;max-width:46%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,Consolas,
+  monospace;font-size:11.5px;font-weight:500;color:var(--dim);background:var(--bg);
+  border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.step .codewrap>summary .sumcap{min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:660px){.step .codewrap>summary .sumhint{display:none}}
+
+.theory .foldwrap{margin:14px 0 4px;border:1px solid var(--line);border-radius:9px;
+  overflow:hidden;background:var(--bg3)}
+.theory .foldwrap>summary{cursor:pointer;list-style:none;padding:9px 14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:14px;
+  font-weight:600;color:var(--fg);user-select:none}
+.theory .foldwrap>summary::-webkit-details-marker{display:none}
+.theory .foldwrap>summary .sumcap{flex:1 1 auto;min-width:0}
+.theory .foldwrap>summary .sumcap::before{content:"▸  ";color:var(--accent);
+  font-size:12px;display:inline-block;transition:transform .15s}
+.theory .foldwrap[open]>summary .sumcap::before{transform:rotate(90deg)}
+.theory .foldwrap>summary .foldhint{flex:0 0 auto;font-size:12px;font-weight:500;
+  color:var(--dim)}
+.theory .foldwrap[open]>summary{border-bottom:1px solid var(--line);
+  background:var(--bg2)}
+.theory .foldwrap[open]>summary .foldhint{display:none}
+.theory .foldwrap>pre.ascii{margin:0;border:0;border-radius:0;background:#fff;
+  color:var(--fg);font-size:12.6px;line-height:1.62;white-space:pre-wrap;
+  word-break:break-word;overflow-x:auto;tab-size:4;-moz-tab-size:4}
+@media (max-width:660px){.theory .foldwrap>summary .foldhint{display:none}}
+
+
+.files{display:flex;flex-direction:column;gap:6px;margin:14px 0 24px}
+.frow{display:flex;align-items:baseline;gap:11px;font-size:14px;padding:7px 13px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:7px}
+.tag{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;
+  flex:0 0 auto;letter-spacing:.3px}
+.tag.new{background:rgba(21,128,61,.10);color:var(--new);
+  border:1px solid rgba(21,128,61,.30)}
+.tag.mod{background:rgba(180,83,9,.10);color:var(--mod);
+  border:1px solid rgba(180,83,9,.30)}
+
+.codeov{margin:14px 0 0;padding:12px 15px;background:var(--bg2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;font-size:14.5px;line-height:1.8}
+.frow .mono{flex:0 0 auto;font-weight:600}
+.frow .fdesc{color:var(--dim);font-size:13px;line-height:1.6}
+
+
+.codeblock{margin:18px 0 26px;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;background:var(--code);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fname{padding:9px 15px;background:var(--bg3);border-bottom:1px solid var(--line);
+  font-size:13px;color:var(--fg);display:flex;justify-content:space-between;
+  align-items:center;gap:12px}
+.fname .rng{color:var(--dim);font-size:12px;flex:0 0 auto}
+
+.step .codewrap>summary .loc{flex:1 1 100%;min-width:0;margin:2px 0 0;
+  font-size:12.5px;font-weight:500;line-height:1.7;color:var(--dim);
+  overflow-wrap:anywhere;user-select:text}
+.step .codewrap>summary .loc b{color:var(--fg);font-weight:600}
+.step .codewrap>summary .loc code{background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:0 4px;font-size:12px;color:var(--fg);cursor:pointer}
+.step .codewrap>summary .loc code:hover{border-color:var(--accent);background:#fff}
+.step .codewrap>summary .loc .locok{color:var(--new);font-weight:600;
+  margin-left:4px;user-select:none}
+.cap{padding:11px 15px;background:var(--bg2);border-bottom:1px solid var(--line);
+  font-size:14.5px;font-weight:600}
+.codenote{padding:11px 15px;background:var(--bg2);border-top:1px solid var(--line);
+  font-size:14px;color:var(--dim);line-height:1.7}
+.codenote b{color:var(--fg)}
+.codeblock .hl{overflow-x:auto;margin:0}
+.codeblock table.hl{border-spacing:0;width:100%;margin:0}
+.codeblock td{padding:0;vertical-align:top}
+.codeblock td.linenos{width:1%;white-space:nowrap;padding:0 0 0 12px;
+  border-right:1px solid var(--line);background:var(--bg3)}
+.codeblock td.linenos pre{margin:0;padding:13px 9px 13px 0;color:#9aa4b5;
+  font-size:12.5px;line-height:1.62;text-align:right}
+.codeblock td.code pre{margin:0;padding:13px 16px;font-size:13.3px;line-height:1.62;
+  color:var(--fg)}
+.codeblock .hll{background:rgba(37,99,235,.08);display:block;
+  box-shadow:inset 3px 0 0 var(--accent)}
+
+
+.codeblock .hll.hlw{background:rgba(180,83,9,.10);
+  box-shadow:inset 3px 0 0 var(--mod)}
+.hleg{margin:14px 0 0;padding:11px 14px;background:var(--bg2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 7px 7px 0;font-size:13.5px;line-height:1.85;color:var(--fg)}
+.sw{display:inline-block;width:22px;height:11px;border-radius:2px;
+  vertical-align:-1px;margin:0 5px 0 12px}
+.hleg .sw:first-child{margin-left:0}
+.sw-b{background:rgba(37,99,235,.14);box-shadow:inset 4px 0 0 var(--accent)}
+.sw-y{background:rgba(180,83,9,.16);box-shadow:inset 4px 0 0 var(--mod)}
+
+
+.codeblock tr.ctxhead td,.codeblock tr.ctxtail td{background:#eef1f6}
+.codeblock tr.ctxhead td{border-bottom:1px solid var(--line)}
+.codeblock tr.ctxtail td{border-top:1px solid var(--line)}
+.codeblock td.ctxl{width:1%;white-space:nowrap;padding:0 0 0 12px;
+  border-right:1px solid var(--line);color:#9aa4b5}
+.codeblock td.ctxl pre{margin:0;padding:5px 9px 5px 0;text-align:right;
+  color:#9aa4b5;font-size:12.5px;line-height:1.62}
+.codeblock td.ctxcode pre{margin:0;padding:5px 16px;color:#7a8494;
+  font-size:12.5px;line-height:1.62;white-space:pre-wrap;
+  overflow-wrap:anywhere}
+
+
+.codeblock .c,.codeblock .c1,.codeblock .cm,.codeblock .cs{color:#5c6678;font-style:italic}
+.codeblock .k,.codeblock .kc,.codeblock .kd,.codeblock .kn{color:#cf222e}
+.codeblock .ow,.codeblock .o{color:#0550ae}
+.codeblock .p{color:#57606a}
+.codeblock .s,.codeblock .s1,.codeblock .s2,.codeblock .sa,.codeblock .sb,
+.codeblock .sd,.codeblock .se,.codeblock .si,.codeblock .sr{color:#0a3069}
+.codeblock .mi,.codeblock .mf,.codeblock .mh,.codeblock .mo{color:#0550ae}
+.codeblock .nb,.codeblock .bp{color:#0550ae}
+.codeblock .nf,.codeblock .nd,.codeblock .fm{color:#6b3fc4}
+.codeblock .nc,.codeblock .nn,.codeblock .vm{color:#953800}
+.codeblock .ne{color:#cf222e}
+pre.ascii{background:var(--bg2);border:1px solid var(--line);border-radius:8px;
+  padding:14px 17px;font-size:13px;line-height:1.6;color:var(--warn);overflow-x:auto}
+
+
+.run{margin:16px 0 24px;display:flex;flex-direction:column;gap:11px}
+.runrow{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.runlabel{padding:7px 13px;background:var(--bg3);font-size:13px;color:var(--dim);
+  border-bottom:1px solid var(--line)}
+.runrow pre{margin:0;padding:11px 14px;background:var(--code);overflow-x:auto;
+  font-size:13.2px;line-height:1.65}
+
+
+.verify{margin:16px 0 8px;padding:0;list-style:none}
+.verify li{position:relative;padding:9px 0 9px 32px;border-bottom:1px dashed var(--line);
+  font-size:15px;margin:0}
+.verify li:last-child{border-bottom:0}
+.verify li::before{content:"☐";position:absolute;left:6px;top:8px;
+  color:var(--accent);font-size:16px}
+
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px;margin:20px 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px}
+.card h4{margin:0 0 7px;font-size:16px}
+.card p{margin:0;color:var(--dim);font-size:14px}
+.card .step{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px}
+
+
+.tree{background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:16px 19px;font-size:13.5px;line-height:1.85;overflow-x:auto;color:var(--fg);
+  white-space:pre}
+.tree.toc{white-space:normal}
+.toc-title{margin-bottom:10px}
+.toc-row{display:block}
+.tree .c{color:#5c6678}
+.tree .f-new{color:var(--new)}
+.tree .f{color:var(--fg)}
+
+
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.plain{width:100%;min-width:420px;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+table.plain th,table.plain td{padding:9px 13px;border-bottom:1px solid var(--line);
+  text-align:left;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}
+table.plain th{color:var(--dim);font-weight:600;font-size:13.5px}
+@media (max-width:520px){table.plain{font-size:13.5px}
+  table.plain th,table.plain td{padding:8px 10px}}
+.warnbox{margin:18px 0;padding:14px 18px;background:rgba(180,83,9,.06);
+  border:1px solid rgba(180,83,9,.22);border-radius:9px;font-size:14.6px}
+.warnbox b{color:var(--warn)}
+.okbox{margin:18px 0;padding:14px 18px;background:rgba(21,128,61,.06);
+  border:1px solid rgba(21,128,61,.22);border-radius:9px;font-size:14.6px}
+.okbox b{color:var(--new)}
+footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--line);
+  color:var(--dim);font-size:13.5px}
+</style>
+<style>.series-bridge{margin:24px 0;padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--bg2);font-size:14px}.series-bridge p{margin:6px 0}.series-bridge a{font-weight:600}.series-language{font-size:13.5px;white-space:nowrap;padding:4px 8px;border-left:1px solid var(--line)}[id]{scroll-margin-top:var(--series-offset,110px)}.top nav a[aria-current="page"]{color:var(--fg);background:var(--bg3)}@media(max-width:600px){.wrap li code,.wrap p code{white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .sumfile{white-space:normal;overflow-wrap:anywhere;min-width:0;max-width:100%}.step .codewrap>summary .sumcap{white-space:normal;min-width:0}.frow{flex-wrap:wrap}.frow .fdesc{flex:1 1 200px;min-width:0}.frow .mono{overflow-wrap:anywhere;min-width:0}.frow code{white-space:normal;overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}</style>
+</head>
+<body>
+<header class="top"><div class="top-in"><div class="brand">mini<span> agent-1</span> · 手搓一个 coding agent</div><nav aria-label="Series"><a href="#series-start" aria-current="page">mini agent-1</a><a href="advanced-guide.zh-CN.html">mini agent-2</a></nav><a class="series-language" data-target="guide.html" href="guide.html" lang="en">English</a></div></header>
+<div class="wrap">
+
+<div class="hero"><p class="goal">教程默认使用英文，可通过顶部语言链接切换中文。CLI 提示使用英文，模型回复跟随用户语言；源码展示对应当前无注释版本。</p>
+  <h1 id="series-start">mini agent-1</h1>
+  <p class="lead">这份个人整理主要参考了 pi 和 Codex 的源码。</p>
+  <div class="tree toc" style="font-size:13px">
+    <div class="toc-title"><b>目录</b></div>
+    <div class="toc-row">第 1 章 · <a href="#ch1">Agent Loop</a>　<span class="c">把循环跑起来</span></div><div class="toc-row">第 2 章 · <a href="#ch2">Tools</a>　<span class="c">给 agent 一双手</span></div><div class="toc-row">第 3 章 · <a href="#ch3">变更队列</a>　<span class="c">并发写文件不能乱</span></div><div class="toc-row">第 4 章 · <a href="#ch4">中断与转向</a>　<span class="c">跑起来之后怎么插手</span></div><div class="toc-row">第 5 章 · <a href="#ch5">会话持久化</a>　<span class="c">关掉还能接着聊</span></div><div class="toc-row">第 6 章 · <a href="#ch6">上下文压缩</a>　<span class="c">历史太长怎么办</span></div><div class="toc-row">第 7 章 · <a href="#ch7">系统提示词与技能</a>　<span class="c">让它知道自己在哪</span></div>
+  </div>
+</div>
+<div class="series-bridge"><b>mini agent-1 · 1—7章</b><p>循环、工具、并发、中断、会话、上下文压缩与技能构成这里的实现。后续的请求重试、执行恢复、流式与授权在 mini agent-2 中继续展开。</p><a href="advanced-guide.zh-CN.html#ch8">继续 mini agent-2 · 第8章 →</a></div>
+<div class="chapter" id="ch1">
+<div class="chead"><span class="cnum">第 1 章</span><h2>Agent Loop</h2><span class="csub">把循环跑起来</span></div>
+<div class="goal"><b>目标</b>　写一个能自己连着干活的循环：问模型 → 它说要调工具 → 你执行 → 结果塞回去 → 再问一次，直到它不再要工具。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>单次问答的模型没有行动能力 —— 它能告诉你怎么做，但碰不到你的文件。</li>
+<li>一旦模型说「我要调工具」，就产生三个新问题：谁执行它？结果怎么回传？什么时候停？</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>要理解 agent loop，先要接受一个有点反直觉的前提：<strong>大模型本身什么也做不了</strong>。它是一个纯粹的函数 —— 给它一段文本，它还你一段文本，然后就忘了。它没有记忆、没有手、没有状态。</p>
+<p>所以「agent」不是模型的能力，<strong>是你写的那个循环</strong>。循环的唯一职责是：把模型输出的「我想做某事」翻译成真实动作，再把动作的结果翻译回文本喂给它。智能全在模型里，你的代码只负责搬运和记账。</p>
+<h4 class="mini">工具调用到底是什么</h4>
+<p>模型说「我要调工具」时，它<strong>并没有执行任何东西</strong>。它只是在输出的 JSON 里多塞了一个 <code>tool_calls</code> 数组，每项形如 <code>{id: &quot;call_01...&quot;, function: {name: &quot;read&quot;, arguments: &quot;{...}&quot;}}</code>。其中 <code>arguments</code> 是被<strong>字符串化</strong>的 JSON 参数。这个数组的意思是「如果有一双手，我希望它去读这个文件」—— 执行与否完全取决于你。</p>
+<p>理解这一点，整个架构就顺了：<strong>循环就是那双手</strong>。模型负责想，你负责做，做完再把结果告诉它。</p>
+<h4 class="mini">先看清楚：OpenAI 风格的会话长什么样</h4>
+<p>在动手写循环之前，得先知道一次请求长什么样。整个协议其实只有一个入口：向 <code>{base_url}/chat/completions</code> 发一个 POST。请求体就三大块 ——</p>
+<pre class="ascii">POST {base_url}/chat/completions
+{
+  &quot;model&quot;:    &quot;gpt-4o-mini&quot;,
+  &quot;messages&quot;: [                                  ← 整段对话，一个列表
+    {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are a coding agent...&quot;},
+    {&quot;role&quot;: &quot;user&quot;,   &quot;content&quot;: &quot;帮我看看 config.py&quot;},
+    ...
+  ],
+  &quot;tools&quot;:    [ ...工具声明... ]                  ← 模型能用的&quot;手&quot;
+}</pre>
+<p><code>messages</code> 是一个<strong>列表</strong>，每一条形如 <code>{&quot;role&quot;: ..., &quot;content&quot;: ...}</code>。role 一共就四种，把它们的分工记牢，后面每一章都要用：</p>
+<ul><li><code>system</code>：系统提示词，给模型定身份和规则，<strong>只放在最前面一条</strong>（第 7 章专讲）。</li><li><code>user</code>：用户说的话。</li><li><code>assistant</code>：模型说的话；它想调工具时，这条消息会<strong>多出一个 <code>tool_calls</code> 数组</strong>。</li><li><code>tool</code>：工具执行的结果，<strong>单独一条</strong>，靠 <code>tool_call_id</code> 认领它属于哪个调用。</li></ul>
+<p>回包也是一个 JSON。真正要紧的只有一条路径：<strong><code>choices[0].message</code></strong> —— 这就是模型这一轮的回复，下一轮你要原样塞回 <code>messages</code> 的就是它：</p>
+<pre class="ascii">{
+  &quot;choices&quot;: [
+    {
+      &quot;message&quot;: { &quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: null,
+                   &quot;tool_calls&quot;: [ {&quot;id&quot;: ..., &quot;function&quot;: {&quot;name&quot;: ..., &quot;arguments&quot;: ...}} ] },
+      &quot;finish_reason&quot;: &quot;tool_calls&quot;        ← 同一层的另一个字段
+    }
+  ]
+}</pre>
+<p>注意 <code>finish_reason</code> 和 <code>message</code> 是<strong>同一层的兄弟字段</strong>：一个装着模型说的话，一个装着「它为什么会停下来」的说明。这个区别马上就会用到。</p>
+<h4 class="mini">背景：想核对字段，去哪看官方文档</h4>
+<p>上面画的请求和响应不是我编的，是 OpenAI 的 <strong>Chat Completions</strong> 接口 —— 整个接口只有这一个入口：向 <code>{base_url}/chat/completions</code> 发一个 POST，回来一个 JSON。想核对任何字段的确切含义，看这几页就够：</p>
+<ul><li><strong>请求体</strong>里每个字段（<code>model</code> / <code>messages</code> / <code>tools</code> / <code>max_tokens</code> …）的定义：<a href="https://platform.openai.com/docs/api-reference/chat/create" target="_blank" rel="noreferrer">api-reference/chat/create</a></li><li><strong>响应对象</strong>长什么样（<code>choices</code> → <code>message</code> → <code>content</code> / <code>tool_calls</code>，以及同层的 <code>finish_reason</code>）：<a href="https://platform.openai.com/docs/api-reference/chat/object" target="_blank" rel="noreferrer">api-reference/chat/object</a></li><li>四种角色（<code>system</code> / <code>user</code> / <code>assistant</code> / <code>tool</code>）怎么配合、完整对话示例：<a href="https://platform.openai.com/docs/api-reference/chat" target="_blank" rel="noreferrer">api-reference/chat</a></li><li>工具调用这一整套约定（<code>tools</code> 声明、<code>tool_calls</code> 返回、<code>tool_call_id</code> 配对）：<a href="https://platform.openai.com/docs/guides/function-calling" target="_blank" rel="noreferrer">guides/function-calling</a></li></ul>
+<p>对照文档你会发现：请求体里这里只用了四个字段 —— <code>model</code>、<code>max_tokens</code>、<code>messages</code>、<code>tools</code>；响应里只读 <code>choices[0].message</code>（文字在 <code>content</code>，工具调用在 <code>tool_calls</code>），其余字段一律忽略。<strong>协议很大，agent 需要的是很小一块</strong> —— 流式、多模态、采样参数、logprobs 这些，先当它们不存在。</p>
+<h4 class="mini">消息协议的硬约束</h4>
+<p>OpenAI 风格（chat/completions）对历史结构有强制要求。这条约束是后面好几章所有麻烦的根源，必须一开始就记住：</p>
+<pre class="ascii">user      「帮我看看 config.py」
+assistant {content: ..., tool_calls: [{id: &quot;call_A&quot;, function: {name: read, ...}}]}  ← 只有意图
+tool      {tool_call_id: &quot;call_A&quot;, content: &quot;...&quot;}                     ← 必须配对
+assistant 「这个文件里定义了一个 CONFIG 字典...」                           ← 收工</pre>
+<p><strong>每个 <code>tool_call</code> 都必须有一条 <code>tool_call_id</code> 相同的 <code>role</code> 为 <code>tool</code> 的消息</strong>，一个都不能少、也不能多。后面也会用到这条规则：第 4 章中断时要补配对、第 6 章压缩时切点不能拆散配对，都是因为它。</p>
+<p>还要注意 role 的用法：工具结果是<strong>单独的 <code>role=&quot;tool&quot;</code> 消息</strong>，内容是明文（多为字符串化的 JSON），不是 <code>assistant</code>。这一点在第 6 章会导致一个非常隐蔽的坑。</p>
+<h4 class="mini">那为什么循环的终止条件不看 finish_reason</h4>
+<p>上一节看到，<code>finish_reason</code> 和 <code>message</code> 是<strong>同一层的兄弟字段</strong>，而且它看起来很现成：模型要调工具时它是 <code>&quot;tool_calls&quot;</code>，正常说完话时它是 <code>&quot;stop&quot;</code>。拿它来判断「循环要不要继续」几乎是最自然的写法 —— <strong>但这恰恰是要避免的</strong>。</p>
+<p>原因在于这两个字段的<strong>性质完全不同</strong>：</p>
+<ul><li><code>finish_reason</code> 是<strong>服务商的元数据</strong>：它只描述「生成是怎么停下来的」，本身不是对话内容的一部分。不同厂商、不同兼容端点取值并不完全一致，实测有过差异。</li><li>而 <code>message.tool_calls</code> 是<strong>你亲手写进历史的事实</strong>：模型到底有没有给出工具调用，看这个数组在不在、是不是空的就行，永远可靠。</li></ul>
+<p>所以本章的判据定为「assistant 消息里有没有非空的 <code>tool_calls</code>」，而不是看 <code>finish_reason</code>。<strong>用事实判断，不要用元数据判断</strong> —— 这是个可以推广到很多地方的工程原则。</p>
+<h4 class="mini">成本结构：为什么后面一定要压缩</h4>
+<p>注意请求体里的 <code>messages</code> 是<strong>完整历史</strong>，不是这一句。因为模型无状态，你不发它就不知道之前聊过什么。</p>
+<p>于是有笔账要算：假设每轮产生 1 条消息，第 N 轮要发 N 条。N 轮下来累计发送量是 1+2+...+N ≈ <strong>N²/2</strong>。<strong>对话长度的增长会让成本呈平方级上升</strong>。</p>
+<p>这就是第 6 章压缩存在的根本原因 —— 不是锦上添花，而是不压缩的话，稍微聊久一点就会撞上上下文窗口，API 直接报错。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>循环只有一个终止条件</strong>：这一轮响应里没有 <code>tool_calls</code> 数组。不要去看 <code>finish_reason</code> —— 那是服务商的元数据，命名不统一；而「assistant 消息里有没有 <code>tool_calls</code>」是你亲手构造的事实，永远可靠。</li>
+<li><strong>模型是无状态的</strong>。它不记得上一轮说过什么，所以每一轮都要把<strong>完整历史</strong>重新发一遍。这是所有 agent 成本结构的总根源，也是第 6 章要压缩历史的原因。</li>
+<li><strong>assistant 消息要原样存</strong>。它除了 <code>content</code> 还有 <code>tool_calls</code> 数组，下一轮要靠里面的 id 去配对 <code>role=&quot;tool&quot;</code> 的结果。只存文字会导致下一轮请求失败。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章从零搭出 <code>mini_agent/</code> 这个包的骨架：<code>config.py</code> 把可调项集中一处，<code>llm.py</code> 是统一处理模型请求的地方，<code>agent.py</code> 写主循环，<code>cli.py</code> 让它在终端里真的跑起来。<strong>写完这章，你就有了一个能自己连着调工具干活的 agent</strong> —— 后面会在这份代码上逐步补充，尽量沿用已有的结构。</p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">config.py</span><span class="fdesc">所有可调参数（base_url、api_key、model、超时…）集中一处，都能用环境变量覆盖。</span></div><div class="frow"><span class="tag new">新增</span><span class="mono">llm.py</span><span class="fdesc"><code>call_llm()</code> 发一次请求；<code>extract_message</code> / <code>extract_text</code> / <code>extract_tool_calls</code> 从响应里取消息、文字、工具调用。</span></div><div class="frow"><span class="tag new">新增</span><span class="mono">agent.py</span><span class="fdesc"><code>agent_loop()</code>：问模型 → 原样存消息 → 有 <code>tool_calls</code> 就执行 → 结果回灌 → 再问，直到没有 <code>tool_calls</code>。</span></div><div class="frow"><span class="tag new">新增</span><span class="mono">cli.py</span><span class="fdesc">终端 REPL：读一行、跑一轮、打印回答；<code>-v</code> 控制要不要打工具输出。</span></div><div class="frow"><span class="tag new">新增</span><span class="mono">__init__.py</span><span class="fdesc">包声明，让 <code>mini_agent</code> 成为一个可 import 的包。</span></div><div class="frow"><span class="tag new">新增</span><span class="mono">__main__.py</span><span class="fdesc">一行入口（<code>from .cli import main</code>），让 <code>python -m mini_agent</code> 能启动。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：先写 config.py，把可变量集中</h5>
+<ul><li>查看 <code>mini_agent/config.py</code> 的 CONFIG，模型地址、密钥和模型名从环境变量读取。</li><li>同一份配置也包含后续章节使用的会话和压缩参数，这里先关注模型请求部分。</li></ul>
+{{SOURCE:config-10-53|配置与密钥检查}}
+</div>
+<div class="step"><h5>第 2 步：写 llm.call_llm —— 模型请求入口</h5>
+<ul><li><code>mini_agent/llm.py</code> 的 <code>call_llm</code> 把 system 与历史拼成请求，并发送到 <code>/chat/completions</code>。</li><li>请求返回前后会检查 signal；中断的细节放在第 4 章。</li></ul>
+{{INLINE:llm-9-21|请求模块的导入与默认提示词}}
+<p class="exnote"><code>call_llm</code> 的 system 参数默认是 SYSTEM_PROMPT。CLI 会传入第 7 章组装的完整系统提示词；传入 None 时也会使用这个默认常量。</p>
+{{SOURCE:llm-24-75|call_llm：发送模型请求}}
+</div>
+<div class="step"><h5>第 3 步：把「读响应」抽成三个小函数</h5>
+<ul><li>查看 <code>extract_message</code>、<code>extract_text</code>、<code>extract_tool_calls</code>；消息保留 content 和工具调用信息。</li><li>下面的 JSON 用来对照响应结构，不是另一个阶段的代码文件。</li></ul>
+<p class="exnote">① 模型只想说话：<code>tool_calls</code> 这一项根本不存在，<code>content</code> 是文字</p>
+<pre class="ascii">{
+  &quot;id&quot;: &quot;a5d97c0de647ad8fd550f43b9cd98d52&quot;,
+  &quot;object&quot;: &quot;chat.completion&quot;,
+  &quot;model&quot;: &quot;deepseek/deepseek-v4.1-flash&quot;,
+  &quot;choices&quot;: [
+    {
+      &quot;index&quot;: 0,
+      &quot;message&quot;: {
+        &quot;role&quot;: &quot;assistant&quot;,
+        &quot;content&quot;: &quot;你好呀&quot;,
+        &quot;reasoning_content&quot;: &quot;……（这里躺着模型的思考过程，这里不读取）&quot;
+      },
+      &quot;finish_reason&quot;: &quot;stop&quot;
+    }
+  ]
+}</pre>
+<p class="exnote">② 模型要调工具：多出一个 <code>tool_calls</code> 数组，<code>content</code> 是空的</p>
+<pre class="ascii">{
+  &quot;id&quot;: &quot;31627bb7940ad33d1b3bba47858e514b&quot;,
+  &quot;object&quot;: &quot;chat.completion&quot;,
+  &quot;model&quot;: &quot;deepseek/deepseek-v4.1-flash&quot;,
+  &quot;choices&quot;: [
+    {
+      &quot;index&quot;: 0,
+      &quot;message&quot;: {
+        &quot;role&quot;: &quot;assistant&quot;,
+        &quot;content&quot;: &quot;&quot;,
+        &quot;tool_calls&quot;: [
+          {
+            &quot;id&quot;: &quot;call_00_wo91vwl3s4wkiiidgyvi9fln&quot;,
+            &quot;type&quot;: &quot;function&quot;,
+            &quot;function&quot;: {
+              &quot;name&quot;: &quot;bash&quot;,
+              &quot;arguments&quot;: &quot;{\&quot;command\&quot;: \&quot;ls -la\&quot;}&quot;
+            }
+          }
+        ],
+        &quot;reasoning_content&quot;: &quot;……（同上，不读）&quot;
+      },
+      &quot;finish_reason&quot;: &quot;tool_calls&quot;
+    }
+  ]
+}</pre>
+<p class="exnote">这两段是从<strong>真实端点</strong>抓下来的原样回包（只省掉了 <code>usage</code> / <code>created</code> 这类字段）。盯住三件事：① 最外层是 <code>choices</code> <strong>数组</strong>，本轮回复在 <code>choices[0].message</code>，而 <code>finish_reason</code> 是 <code>message</code> 的<strong>兄弟字段</strong>（不是它的儿子）；② <code>tool_calls</code> 只在模型想调工具时才出现，这时 <code>content</code> 可能是 <code>null</code>（官方文档的说法），也可能是空字符串 <code>&quot;&quot;</code>（很多兼容端点这样，本机那个端点就是）—— 所以读文字一律写成 <code>content or &quot;&quot;</code>；③ <code>tool_calls</code> 里的 <code>arguments</code> 是<strong>字符串</strong>而不是 dict，想当参数用还得自己 <code>json.loads()</code> 一次。</p>
+{{SOURCE:llm-78-93|三个读响应的小函数}}
+</div>
+<div class="step"><h5>第 4 步：写循环骨架 —— 本章的核心</h5>
+<ul><li>查看 <code>mini_agent/agent.py</code> 的 <code>agent_loop</code>：请求模型、保存回复、执行工具、回灌结果。</li><li>工具实现集中在 <code>mini_agent/tools.py</code>；这里以 shell 工具为例，其他工具放在第 2 章。</li><li>当前循环还包含中断、持久化和压缩的接入点，后面分开说明。</li></ul>
+{{INLINE:agent-10-17|主循环模块的导入}}
+{{INLINE:agent-30-54|默认事件回调}}
+{{INLINE:tools-36-53|shell 工具的声明}}
+<p class="exnote">上面分别来自 agent.py 与 tools.py；工具实现不再放在 agent.py 内。</p>
+{{SOURCE:tools-101-124|tool_bash：执行 shell 命令}}
+{{SOURCE:agent-195-245|agent_loop：模型、工具与历史}}
+</div>
+<div class="step"><h5>第 5 步：写 CLI，让它能真的跑起来</h5>
+<ul><li><code>mini_agent/cli.py</code> 的 <code>build_parser</code> 与 <code>main</code> 负责启动；交互输入由 <code>App.repl</code> 处理。</li><li><code>main</code> 中一次性模式直接调用循环，交互模式进入 App。</li></ul>
+{{INLINE:cli-10-17|CLI 的导入}}
+<p class="exnote">这些导入对应参数解析、后台线程、会话、提示词和循环调用，均来自当前 cli.py。</p>
+{{SOURCE:cli-270-312|命令行参数与入口}}
+</div>
+</div>
+</div><div class="chapter" id="ch2">
+<div class="chead"><span class="cnum">第 2 章</span><h2>Tools</h2><span class="csub">给 agent 一双手</span></div>
+<div class="goal"><b>目标</b>　把工具抽象成「名字 → 函数」的一张表。此后加工具只改一个文件，循环一行都不用动。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>如果在循环里用 if/elif 判断工具名，每加一个工具都要动核心代码 —— 核心代码动得越多，越容易改坏。</li>
+<li>工具执行失败（文件不存在、命令超时）如果直接抛异常，整个 agent 就崩了，用户只看到一堆栈。</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>第 1 章的循环里，执行工具那段大概是这样的：</p>
+<pre class="ascii">if name == &quot;bash&quot;:     result = run_bash(inp)
+elif name == &quot;read&quot;:   result = read_file(inp)
+elif name == &quot;write&quot;:  result = write_file(inp)
+else:                   result = &quot;unknown tool&quot;</pre>
+<p>这能跑。但它有两个问题，而且都会随着项目变大而恶化。</p>
+<h4 class="mini">问题一：核心代码被工具列表绑架</h4>
+<p>每加一个工具就要改一次主循环。而主循环是整个项目最不该动的文件 ——它承载着后面所有章节的功能（中断、压缩、落盘），动它一次就要重新验证全部行为。</p>
+<p>解法是经典的<strong>表驱动</strong>：把「名字 → 实现」存成一张字典，循环只写一行 <code>submit(name, input)</code>。加工具 = 改表，不改逻辑。这里把工具调用与具体实现分开。</p>
+<h4 class="mini">问题二：工具失败会把 agent 弄崩</h4>
+<p>文件不存在、命令超时、路径越界 —— 这些在 agent 场景下<strong>都是常态</strong>，不是异常情况。它们随时会发生，因为调用方是一个会犯错的模型。</p>
+<p>如果直接抛异常，整个 agent 就死了，用户只看到一堆栈。而如果把错误信息<strong>当作工具结果返回给模型</strong>，它会自己看懂并换个做法 ——比如看到「文件不存在」，它就会去列一下目录里有什么。</p>
+<p>这里有个反直觉但很重要的判断：<strong>错误处理的责任转移了</strong>。传统程序里错误要由调用方处理；在 agent 里，<strong>错误是喂给模型的输入</strong>。所以工具永远返回字符串，从不抛异常。</p>
+<h4 class="mini">发给模型的东西和给自己用的东西，是两份</h4>
+<p>API 的 <code>tools</code> 参数要求每个工具提供：名字、说明、以及一个 JSON Schema 描述参数。这份声明会被<strong>原样序列化进请求体</strong>，模型完全靠它来决定「我该怎么填参数」。</p>
+<p>所以你的代码里要有两份表：</p>
+<ul><li><code>TOOLS</code> —— 给<strong>模型</strong>看的声明。写得含糊，模型就会填错参数。</li><li><code>HANDLERS</code> —— 给<strong>自己</strong>用的实现字典。</li></ul>
+<p><strong>两份表必须同名</strong>。名字对不上，模型会看到一个「声明存在、但调用时必然失败」的工具 —— 这种 bug 很隐蔽，因为模型不会说「这个工具没实现」，它只会反复重试。</p>
+<h4 class="mini">为什么文件操作不走 shell</h4>
+<p>一个很自然的想法是：读文件就执行 <code>cat xxx</code>，写文件就 <code>echo ... &gt; xxx</code>。<strong>不要这么做</strong>，有三个原因：</p>
+<ul><li><strong>引号转义</strong>：文件名里有空格或中文括号，拼出来的命令就断了；内容里有引号更是灾难。</li><li><strong>glob 展开</strong>：<code>cat *.py</code> 会被 shell 展开成一堆文件，而模型的本意可能就是一个叫 <code>*.py</code> 的文件。</li><li><strong>无法定位错误</strong>：shell 只给你一个返回码，你不知道是文件不存在还是权限不够。直接 <code>open()</code> 的话，<code>OSError</code> 会明确告诉你原因。</li></ul>
+<p><strong>路径就是路径，内容就是内容</strong>。shell 只留给真正需要跑命令的场景（调用 git、跑测试）。</p>
+<h4 class="mini">路径校验：模型会给出逃逸路径</h4>
+<p>模型可能给出 <code>../../etc/passwd</code>，或者 <code>C:\Windows\System32\...</code>。这不是恶意，它只是在猜。但你的工具不能真的去读。</p>
+<p>解法是把路径<strong>解析成绝对路径</strong>，再确认它落在工作目录的子树内。关键是必须用 <code>os.path.realpath</code> 而不是 <code>abspath</code> —— 前者会展开符号链接。否则一个指向外部的软链接就能绕过检查。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>两张表，职责不同</strong>：<code>TOOLS</code> 是给<strong>模型</strong>看的声明（名字、说明、参数 schema）；<code>HANDLERS</code> 是给<strong>自己</strong>用的实现表。两者必须同名，否则模型会看到一个「存在但调不动」的工具。</li>
+<li><strong>统一签名 <code>(input: dict) -&gt; str</code></strong>，这样所有工具才能塞进同一张表。</li>
+<li><strong>错误也是工具结果</strong>。文件读不到就返回 <code>&quot;Error: ...&quot;</code> 给模型，让它自己想别的办法 —— 这比让程序崩溃有用得多。</li>
+<li><strong>文件操作不走 shell</strong>。读文件就用 open()，不要拼接 <code>cat xxx</code>：没有引号转义问题、没有 glob 展开，路径就是路径。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章只新增 <code>tools.py</code> 一个文件，再让 <code>agent.py</code> 把「执行工具」改成调用统一入口 <code>submit()</code>。<strong>目标：给 agent 一双手</strong> —— 它能读文件、改文件、跑命令，而主循环一行都不用改；要加一个新工具，也只需要动 <code>tools.py</code>。</p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">tools.py</span><span class="fdesc">上半部分是给<strong>模型</strong>看的 <code>TOOLS</code> 声明（OpenAI function schema），下半部分是给<strong>自己</strong>用的 <code>HANDLERS</code> 实现表和 <code>submit()</code> 入口，外加 <code>safe_path()</code> 把模型给的路径关进工作目录。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">agent.py</span><span class="fdesc">执行工具的那一段从「直接调用」改成 <code>tools.submit(name, args)</code> —— 循环从此不关心有哪些工具。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：先写 TOOLS 声明</h5>
+<ul><li>查看 <code>mini_agent/tools.py</code> 的 <code>_function</code> 与 TOOLS，声明 bash、read、write、edit 四个工具。</li><li>schema 中的工具名需要与 HANDLERS 的键对应。</li></ul>
+{{INLINE:tools-8-12|工具模块的导入}}
+<p class="exnote"><code>read</code> 的 <code>parameters</code>：三个键，各管一件事</p>
+<pre class="ascii">{
+  &quot;type&quot;: &quot;object&quot;,                      ← 整体是一个对象（＝ Python 的 dict）
+  &quot;properties&quot;: {                        ← 逐个字段：键 = 参数名，值 = 字段自己的 schema
+    &quot;path&quot;:   {&quot;type&quot;: &quot;string&quot;,  &quot;description&quot;: &quot;要读的文件路径&quot;},
+    &quot;offset&quot;: {&quot;type&quot;: &quot;integer&quot;, &quot;description&quot;: &quot;从第几行开始读，1 起算&quot;},
+    &quot;limit&quot;:  {&quot;type&quot;: &quot;integer&quot;, &quot;description&quot;: &quot;最多读几行&quot;}
+  },
+  &quot;required&quot;: [&quot;path&quot;]                   ← 只有 path 必填；offset / limit 没进这个数组 = 可选
+}</pre>
+<p class="exnote">文件头的依赖来自当前 tools.py，下面的 schema 示例用来解释参数结构。</p>
+{{SOURCE:tools-21-74|TOOLS：发给模型看的工具声明}}
+</div>
+<div class="step"><h5>第 2 步：写 safe_path 做路径校验</h5>
+<ul><li><code>safe_path</code> 使用 realpath 解析路径，再检查目标是否在工作目录中。</li><li>文件工具调用这个函数；shell 工具仍按当前用户权限执行命令。</li></ul>
+{{SOURCE:tools-81-90|safe_path：把模型给的路径关进工作目录}}
+</div>
+<div class="step"><h5>第 3 步：写 bash / read / write 三个工具，签名统一</h5>
+<ul><li>查看 <code>tool_bash</code>、<code>tool_read</code>、<code>tool_write</code>，入参都是字典，返回值都是文本。</li><li>write 已接入变更队列，第 3 章再看队列怎样协调同文件写入。</li></ul>
+<p class="exnote">第 1 章的 <code>config.py</code> 里补这个键（<code>read</code> 要用）</p>
+<pre class="ascii">CONFIG = {
+    &quot;max_read_lines&quot;: 2000,
+}</pre>
+<p class="exnote"><code>tool_read</code> 读的就是 <code>CONFIG</code> 里的这个键。第 1 章那版 <code>config.py</code> 里没有它，漏掉会在读文件时直接抛 <code>KeyError</code>。2000 的意思是「一次最多读 2000 行」，更长的文件让模型用 <code>offset</code> / <code>limit</code> 自己分页。</p>
+{{SOURCE:tools-101-152|bash / read：签名统一}}
+{{SOURCE:tools-155-173|tool_write：整文件覆盖}}
+</div>
+<div class="step"><h5>第 4 步：edit 的关键是「必须唯一」</h5>
+<ul><li><code>tool_edit</code> 先读取内容，再检查 old_string 的匹配次数，只有唯一匹配才替换。</li><li>读、检查和写回都放在 mutate 内，由 mutation_queue.run 调用。</li></ul>
+{{SOURCE:tools-176-217|tool_edit：唯一匹配后替换}}
+</div>
+<div class="step"><h5>第 5 步：写 submit，把两张表接起来</h5>
+<ul><li><code>submit(name, inp)</code> 从 HANDLERS 找到处理函数；工具错误转换成文本返回。</li><li><code>mini_agent/agent.py</code> 的 <code>_run_one(call, signal, emit)</code> 解析 arguments，再调用 toolbox.submit。</li></ul>
+{{INLINE:agent-164-166|循环默认配置与工具表}}
+<p class="exnote">tools 未显式传入时使用 toolbox.TOOLS，与工具模块的声明保持一致。</p>
+{{SOURCE:tools-226-246|HANDLERS + submit：把两张表接起来}}
+{{SOURCE:agent-86-119|_run_one：解析参数并调度工具}}
+</div>
+</div>
+</div><div class="chapter" id="ch3">
+<div class="chead"><span class="cnum">第 3 章</span><h2>变更队列</h2><span class="csub">并发写文件不能乱</span></div>
+<div class="goal"><b>目标</b>　让一轮里的多个工具并发执行（读 5 个文件不用等 5 次），同时保证同一个文件的「读-改-写」严格串行。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li><strong>先有并发，才需要队列</strong>，这个顺序很重要。串行执行时根本不会有冲突。</li>
+<li>并发之后，两个 edit 改同一个文件就会丢更新：</li>
+</ul>
+<pre class="ascii">edit#1: 读到 "A"  ────────────┐
+edit#2: 读到 "A"        ─────┼── 两者都读到 A
+edit#1: 写入 "A1"       ─────┘
+edit#2: 写入 "A2"                  ← 覆盖了 edit#1</pre>
+<h3 class="sub">原理</h3><div class="theory">
+<p>前两章的工具是<strong>串行</strong>执行的：模型一轮里要读 5 个文件，就得等 5 次磁盘 IO。改成并发很自然 —— 但一改就出事。</p>
+<h4 class="mini">丢失更新：并发写文件会丢东西</h4>
+<p>假设模型一轮里发出两个 edit，都改同一个文件：</p>
+<pre class="ascii">edit#1: 读 &quot;A&quot;   ──────────────┐
+edit#2:     读 &quot;A&quot; ──────┼── 两者都读到 A
+edit#1: 写 &quot;A1&quot;  ──────┘
+edit#2:     写 &quot;A2&quot;      ← 覆盖了 edit#1，它的改动消失了</pre>
+<p>这不是「谁后写谁赢」那么简单 —— <strong>edit#1 的改动彻底丢了</strong>，而且没有任何报错。模型以为两处都改了，实际只改了一处。这类 bug 叫「丢失更新」（lost update），是并发编程里最经典的一类问题。</p>
+<p>注意 root cause 是<strong>「读-改-写」不是原子的</strong>。edit 不是一次写入，而是「读进来 → 算新内容 → 写回去」三步。两个 edit 交错执行，第二步就会基于过期的内容计算。</p>
+<h4 class="mini">关键判断：先有并发，才需要队列</h4>
+<p>这个顺序容易被搞反。串行执行时<strong>根本不会有冲突</strong>，没有并发时通常不需要这层协调；这里的同一份实现已包含队列，第 3 章集中说明它的作用。</p>
+<p>如果你先写队列再写并发，会得到一段「看起来在保护什么、但其实没有并发所以永远测不出问题」的代码 —— 那是很糟的状态：你不知道它到底对不对。</p>
+<h4 class="mini">设计：按路径分桶，而不是一条全局锁</h4>
+<p>最省事的做法是加一把全局锁，所有写盘都排队。它能解决问题，但<strong>把并发的好处也一起抹掉了</strong> —— 改 <code>a.py</code> 和改 <code>b.py</code> 明明互不相干，却要互相等待。</p>
+<p>正确做法是<strong>按文件路径分桶</strong>：</p>
+<ul><li>同一个文件 → 共用一把锁 → 串行。</li><li>不同文件 → 各用各的锁 → 依然并行。</li></ul>
+<p>实现就是一个字典 <code>{路径: 锁}</code>，用的时候 <code>setdefault</code> 取一把。相关实现集中在 FileMutationQueue 中，但它有三个容易写错的地方，下面「实现指导」逐一说明。</p>
+<h4 class="mini">隐藏的第二层竞态：取锁这个动作本身</h4>
+<p>按路径分桶之后，还有一个更隐蔽的问题：<strong>「拿到那把锁」这个动作本身也要串行</strong>。看两行代码 <code>lock = locks.get(key)</code>、<code>if lock is None: locks[key] = Lock()</code> —— 这中间是有缝的：</p>
+<pre class="ascii">线程A: get(key) → None  ──────┐
+线程B:      get(key) → None ──┼── 两者都发现「还没有锁」
+线程A: 建 A锁，存进去 ────────┘
+线程B:     建 B锁，存进去    ← 覆盖了 A锁
+结果：两个线程各拿一把不同的锁去改同一个文件</pre>
+<p>这就是为什么模块里有两把锁：一把 <code>_registry</code> 保护那个字典本身，一把 <code>_locks[key]</code> 保护某个文件。<strong>保护「锁」的锁，和锁本身，是两件事</strong> —— 漏掉前者，队列等于不存在。</p>
+<p>这类 bug 的特点是<strong>偶发</strong>：平时跑得好好的，压力一大才丢更新。所以它不能靠测试发现，只能靠推理写对。</p>
+<p>顺带一提：真实项目 pi 里对应的 <code>file-mutation-queue.ts</code> 也只有 61 行。<strong>这类「少而关键」的并发原语，长度短但每行都有理由</strong>，值得逐行读懂。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>按路径分桶</strong>：同一个文件串行，不同文件仍然并行。如果只用一条全局队列，无关文件的写盘也被串起来，白白变慢。</li>
+<li><strong>key 用 realpath 归一化</strong>：否则 <code>./a.txt</code>、<code>a.txt</code>、符号链接会被当成三个不同的 key，各自建一把锁，队列形同虚设。</li>
+<li><strong>取锁这一步本身也要串行</strong>：否则两个并发调用可能同时发现「这把锁还没建」，于是各建一把，等于没有队列。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章新增 <code>mutation_queue.py</code>，改动 <code>tools.py</code> 的 <code>write</code> / <code>edit</code> 两处让写盘排队，并把 <code>agent.py</code> 的工具执行从串行改成线程池。<strong>目标：多个工具能并发跑得快，同时保证同一个文件的「读-改-写」不会互相覆盖。</strong></p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">mutation_queue.py</span><span class="fdesc">按规范化后的绝对路径分桶加锁：同文件串行、不同文件并行；<code>run(path, fn)</code> 是一个文件变更的唯一入口。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">tools.py</span><span class="fdesc"><code>write</code> / <code>edit</code> 把整个「读 → 查重 → 写」序列包成一个闭包交给 <code>mutation_queue.run()</code> —— 排队粒度是整段，不是最后一次写盘。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">agent.py</span><span class="fdesc">工具执行改用 <code>ThreadPoolExecutor</code>，但结果必须按原调用顺序收集 —— 顺序错了模型就对不上号。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：设计 key 的归一化（第一个坑）</h5>
+<ul><li>查看 <code>FileMutationQueue._key_for</code>，用规范化的绝对路径作为分桶键。</li></ul>
+{{SOURCE:mutation_queue-13-25|分桶 key：用 realpath 归一化}}
+</div>
+<div class="step"><h5>第 2 步：写取锁逻辑（第二个坑）</h5>
+<ul><li><code>_registry</code> 保护锁表：同一个 key 共用同一把锁。</li></ul>
+{{SOURCE:mutation_queue-29-36|取锁这一步本身也要串行}}
+</div>
+<div class="step"><h5>第 3 步：写 run()，把操作包进锁里</h5>
+<ul><li><code>run(path, fn)</code> 取得目标文件的锁后调用 fn；不同 key 使用不同锁。</li></ul>
+{{SOURCE:mutation_queue-27-40|run()：把操作包进锁里}}
+</div>
+<div class="step"><h5>第 4 步：改造 edit / write，让整个序列进临界区（第三个坑）</h5>
+<ul><li><code>tool_edit</code> 和 <code>tool_write</code> 都把实际变更动作交给 mutation_queue.run。</li><li>临界区覆盖完整的读、检查、写回过程。</li></ul>
+{{SOURCE:tools-176-217|edit：整个「读 → 查重 → 写」序列进临界区}}
+</div>
+<div class="step"><h5>第 5 步：把循环那边改成线程池</h5>
+<ul><li><code>execute_tool_calls(calls, *, signal, emit, executor=None)</code> 接收线程池；多个任务并发执行，按提交列表收集结果。</li><li><code>make_executor</code> 创建线程池，CLI 初始化时创建，并在调用循环时传入。</li></ul>
+{{INLINE:agent-248-250|创建线程池}}
+{{INLINE:agent-241-243|执行并回灌工具结果}}
+{{INLINE:cli-74-83|CLI 初始化线程池与其他状态}}
+{{INLINE:cli-142-154|worker 将线程池传给循环}}
+{{INLINE:cli-262-263|交互结束时收尾}}
+<p class="exnote">这些都是当前实现的实际调用点，参数名与源文件保持一致。</p>
+{{SOURCE:agent-69-83|execute_tool_calls：并发执行、顺序收集}}
+</div>
+</div>
+</div><div class="chapter" id="ch4">
+<div class="chead"><span class="cnum">第 4 章</span><h2>中断与转向</h2><span class="csub">跑起来之后怎么插手</span></div>
+<div class="goal"><b>目标</b>　agent 在跑的几十秒里，你既能 Ctrl+C 叫停，也能顺手补一句话改变它的方向。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>agent 跑一轮可能要几十秒。如果主线程傻等，你既没法中断，也没法补话。</li>
+<li>中断本身有个隐蔽的坑：如果模型刚说完「我要调工具」你就中断，历史里会留下一条只有 <code>tool_calls</code>、没有对应 <code>role=&quot;tool&quot;</code> 消息的 assistant 消息 —— <strong>下次请求会被 API 直接拒绝</strong>。</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>agent 跑一轮可能要几十秒（模型思考慢 + 工具执行慢）。如果主线程傻等，你既没法叫停，也没法补话 —— 只能干看着它烧钱。</p>
+<p>要解决这个，需要两样互不相同的东西：<strong>中断</strong>（我不想让你继续了）和<strong>转向</strong>（我想让你改个方向）。它们看起来像同一件事，但机制完全不同，所以要两个类。</p>
+<h4 class="mini">中断：为什么用异常，而不是返回值</h4>
+<p>中断可能发生在<strong>很深的地方</strong>：正在 <code>urlopen</code> 等着 HTTP 响应、正在等待一个子进程结束、正在递归的某个工具函数里。</p>
+<p>如果用返回值传播，每个函数的签名都要变成 <code>-&gt; tuple[result, aborted]</code>，每一层都要检查并向上传递。这会把代码污染得没法看，而且<strong>只要漏掉一层，中断就失效</strong>。</p>
+<p>异常天生就是为「跨越很多层直接跳出去」设计的。所以中断用异常：在最外层捕获，在检查点抛出。</p>
+<p>代价是异常会跳过正常的清理逻辑，所以检查点的位置要慎重选 —— 不能扔在「已经改了内存、还没写磁盘」这种中间状态上。</p>
+<h4 class="mini">Signal 为什么用 threading.Event</h4>
+<p>第 4 章同时要把 agent 放到后台线程里跑（主线程才能继续读你的输入）。于是中断标志就变成了<strong>跨线程共享的可变状态</strong>。</p>
+<p>一个普通的 <code>self.flag = True</code> 在这里是危险的：Python 有 GIL，简单赋值一般不会读到撕裂的值，但<strong>内存可见性和指令重排没有任何保证</strong>。<code>threading.Event</code> 内部有锁，是标准做法，也表达了「这是个同步点」的意图。</p>
+<h4 class="mini">转向：为什么用队列，而不是一个变量</h4>
+<p>你可能在 agent 跑的时候连打两三句话。用单个变量存的话，后一句会覆盖前一句，前一句就丢了。所以用队列。</p>
+<p>更关键的是<strong>取走的时机</strong>：请求已经发出去了，你这句话没法塞进当前这轮，只能等下一轮开始前插进历史。所以队列必须在循环的<strong>每轮开头</strong>被清空一次。</p>
+<p>而「清空」这个动作必须是<strong>原子</strong>的：如果先 <code>len()</code> 判断再逐个 <code>pop</code>，中间主线程又 push 了一条，就可能漏掉或重复。所以要用「一次性取走并替换成空列表」的写法，而不是循环 pop。</p>
+<h4 class="mini">最隐蔽的坑：孤儿 tool_call</h4>
+<p>这里需要注意工具调用与结果的配对，可以用测试检查。</p>
+<p>时序是这样的：模型回复「我要调 read 工具」→ 循环把这个 assistant 消息<strong>原样存进历史</strong>（第 1 章的要求）→ 你在这个瞬间按了 Ctrl+C。</p>
+<pre class="ascii">历史里现在是：
+  assistant {tool_calls: [{id: &quot;call_A&quot;, ...}]}   ← 存进去了
+  （没有对应的 role=&quot;tool&quot; 消息）                 ← 因为中断了，工具没跑
+
+下次请求 → API 拒绝：
+  Assistant message with tool_calls must be followed
+  by tool messages for each tool_call_id</pre>
+<p>天真写法是在中断检查处直接 <code>break</code>。但那样历史里就留下了<strong>孤儿 <code>tool_call</code></strong> —— 下次请求会被 API 整个拒绝，而且报错信息完全指不到真正的原因（用户会以为是模型或网络的问题）。</p>
+<p>正确做法：中断时<strong>给每个没执行的调用补一条 <code>role=&quot;tool&quot;</code> 消息</strong>，内容用 <code>tool_call_id</code> 对上、正文写 <code>&quot;Error: aborted&quot;</code>，然后再退出。这样历史始终是合法的。</p>
+<p>这个坑的本质是：<strong>第 1 章那条「每个 <code>tool_call</code> 必须有配对」的协议约束，在第 4 章引入中断之后才真正被违反</strong>。每加一个新功能，都要回头检查它是否破坏了之前的约束。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>中断用异常，不用返回值</strong>。中断可能发生在很深的地方（正在发 HTTP、正在等工具），一层层往上 return 会污染所有函数签名；抛异常则任何检查点都能立刻跳出。</li>
+<li><strong>Signal 用 threading.Event</strong>，因为 agent 跑在子线程里，需要线程安全的跨线程可见性。</li>
+<li><strong>转向用队列</strong>。请求已经发出去了，你这句话没法塞进当前这轮，只能存起来等下一轮开始前插进历史。用队列而不是单个变量，因为你可能连打两句。</li>
+<li><strong>中断后要补齐 <code>role=&quot;tool&quot;</code> 消息</strong>。这里需要保证工具调用和结果完整配对。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章新增 <code>control.py</code>，在 <code>agent.py</code> 的循环里插四个检查点，在 <code>llm.py</code> 里插两次信号检查，最后把 <code>cli.py</code> 的 <code>main()</code> 升级成一个 <code>App</code> 类、让 agent 跑在后台线程里。<strong>目标：agent 在跑的那几十秒里，你随时能 Ctrl+C 叫停，也能顺手补一句话改变它的方向。</strong></p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">control.py</span><span class="fdesc"><code>Aborted</code> 异常 + <code>Signal</code>（用 <code>threading.Event</code> 做的跨线程中断信号）+ <code>SteeringQueue</code>（转向消息队列，<code>drain()</code> 是「取走并清空」的原子动作）。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">agent.py</span><span class="fdesc">四个检查点：轮次开头、请求前、工具执行前后。中断时给被丢弃的每个工具调用补一条 <code>role=&quot;tool&quot;</code> 消息，避免留下孤儿 <code>tool_call</code>。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">llm.py</span><span class="fdesc">发请求前查一次信号（省掉一个没人要的请求），收到响应后再查一次（等回来的这段时间你可能又按了中断）。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">cli.py</span><span class="fdesc">把 <code>main()</code> 拆成一个 <code>App</code> 类（<code>__init__</code> 装状态、<code>repl()</code> 读输入、<code>handle_command()</code> 管 <code>/</code> 命令），主线程启动 worker 后立刻回到 <code>input()</code>：打字进转向队列，Ctrl+C 调 <code>signal.abort()</code>。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：写 control.py 的两个类</h5>
+<ul><li>查看 <code>mini_agent/control.py</code> 的 Signal 与 SteeringQueue，分别存储中断状态和补充输入。</li></ul>
+{{SOURCE:control-11-40|中断信号：Aborted + Signal}}
+{{SOURCE:control-48-70|转向队列：SteeringQueue}}
+</div>
+<div class="step"><h5>第 2 步：在循环里加几个检查点</h5>
+<ul><li><code>agent_loop</code> 开头检查中断、读取转向队列并判断轮数上限。</li><li>assistant 已声明工具调用时，中断分支要补齐结果；<code>_run_one</code> 也会检查 signal。</li></ul>
+{{SOURCE:agent-168-186|循环开头的三个检查点}}
+{{SOURCE:agent-215-236|中断后的工具结果配对}}<div class="codenote">已写入历史的工具调用需要配齐结果，才能继续请求模型。</div>
+{{SOURCE:agent-104-119|工具执行处：中断必须被接住}}
+</div>
+<div class="step"><h5>第 3 步：在 llm.py 里加两次信号检查</h5>
+<ul><li><code>call_llm</code> 在发请求前和收到响应后检查 signal。</li><li>urllib 的阻塞读不能立即取消，因此中断不代表正在执行的请求或工具已经停止。</li></ul>
+{{SOURCE:llm-31-38|llm.py 里的第一次信号检查}}
+{{SOURCE:llm-68-75|第二次检查：请求回来后再看一次}}
+</div>
+<div class="step"><h5>第 4 步：查看 CLI 的后台执行与输入</h5>
+<ul><li><code>App.__init__</code> 保存会话、信号、队列、线程池和渲染器；<code>App.repl</code> 读取普通输入与命令。</li><li><code>App.run_turn</code> 启动后台 worker，主线程继续读取补充输入。</li><li>下面直接展示当前实现；相关会话和压缩接线在后面的章节说明。</li></ul>
+{{INLINE:cli-74-83|App 初始化状态}}
+<p class="exnote">这里也包含第 5–7 章说明的会话、压缩与提示词接线。</p>
+{{SOURCE:cli-239-263|App.repl：交互入口}}
+{{SOURCE:cli-135-183|App.run_turn：后台执行与输入}}
+</div>
+</div>
+</div><div class="chapter" id="ch5">
+<div class="chead"><span class="cnum">第 5 章</span><h2>会话持久化</h2><span class="csub">关掉还能接着聊</span></div>
+<div class="goal"><b>目标</b>　对话落到磁盘上，<code>--continue</code> 能恢复上次那一段。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>前面几章一关掉，对话就没了。上下文是 agent 最贵的东西，丢掉它等于把之前花的 token 全浪费了。</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>前四章的 agent 一关就忘。而上下文恰恰是 agent <strong>最贵的东西</strong> ——里面有你花掉的 token、agent 读过的文件、它做过的决策。丢掉它等于把之前所有的钱和时间都浪费了。</p>
+<h4 class="mini">格式选择：JSONL，而不是一个 JSON 数组</h4>
+<p>最直觉的做法是把整个 <code>messages</code> 列表序列化成一个 <code>.json</code> 文件。但每追加一条消息，都要：读出整个文件 → 解析 → push → 再序列化 → 整份覆盖写。</p>
+<p>改成 <strong>JSONL</strong>（一行一条 JSON）之后，追加就只是 <code>f.write(line + &quot;\n&quot;)</code>。三个理由，按重要性排序：</p>
+<ul><li><strong>追加便宜</strong>：一行一条，O(1) 而不是 O(文件大小)。聊到几百轮时这个差距很可观。</li><li><strong>崩溃安全</strong>：写到第 7 行时断电，前 6 行仍然是完整可解析的。整个 JSON 文件损坏的话，一个字节都读不出来。</li><li><strong>能容忍局部损坏</strong>：单行坏掉跳过它就好，不影响其他行。真实世界的日志文件里总会有半行。</li></ul>
+<p>这个思路有个名字叫<strong>事件日志</strong>（event log）：只追加、不修改，当前状态由重放日志算出来。数据库的 WAL、Git 的 commit 历史 都是同一个套路。</p>
+<h4 class="mini">并发写盘：为什么先写临时文件再改名</h4>
+<p>有一种操作没法用「追加」表达：<strong>整体重写</strong>。第 6 章的压缩会把前 N 条换成 1 条摘要 —— 这不是追加，是替换。</p>
+<p>如果直接打开原文件覆盖写，写到一半崩溃就直接毁掉整个会话。所以要先写 <code>xxx.jsonl.tmp</code>，写完再 <code>os.replace(tmp, path)</code>。</p>
+<p><code>os.replace</code> 在 Windows 和 POSIX 上都是<strong>原子</strong>的：要么看到旧文件，要么看到新文件，不存在中间状态。这是保证「崩溃时数据不损坏」的标准手法。</p>
+<h4 class="mini">最容易写错的地方：append 与 persist 的区别</h4>
+<p>落盘这件事只有两个动作：<strong>改内存</strong>（把消息加进对话列表）和<strong>写磁盘</strong>（往这一行的 JSONL 后面追加）。第 5 章把这两个动作拆给了两个对象 —— <strong>循环改内存，session 写磁盘</strong>。钩子 <code>on_append</code> 就是这条契约的接口：一个动作只能有一个负责人，接错方法就会让某个动作被做两遍。</p>
+<p>先看清钩子的<strong>调用时机</strong>。它就在循环里那层 <code>_append</code> 间接里，共四行：</p>
+<pre class="ascii">def _append(messages, msg, on_append):
+    messages.append(msg)          ← ① 循环自己已经把消息放进内存了
+    if on_append: on_append(msg)  ← ② 钩子只是「通知」：我改完内存了</pre>
+<p>关键在 ②：钩子被调用时，那条消息<strong>已经在内存里了</strong>。所以钩子唯一该做的事就是「把它写进磁盘」—— 这正是 <code>persist</code> 的语义（只写磁盘，不碰内存）。如果接成 <code>append_message</code>（它的语义是「新增一条」：内存 + 磁盘都动），同一个动作就被做了两遍：</p>
+<pre class="ascii">循环:  messages.append(msg)              ← 循环加第一遍
+       → on_append(msg)
+       → session.append_message(msg)
+         → self.messages.append(msg)    ← session 又加第二遍（重复！）
+           self._write_line(msg)        ← 磁盘只写了一行</pre>
+<p>跟着走一轮就看得见后果。假设这一轮是「用户一句 + 模型一次工具调用 + 一条工具结果」，循环跑到工具结果落盘为止：</p>
+<pre class="ascii">               内存                       磁盘
+user           1 条                       1 行  （CLI 走 session.append，同起点）
+assistant      2 条 ← 重复了一份          1 行
+tool           2 条 ← 重复了一份          1 行
+               ─────                      ─────
+               5 条                       3 行  ← 从这里开始两边对不上</pre>
+<p>注意<strong>哪边才是错的：磁盘那 3 行是对的，多出来的是内存</strong>。所以它不会在写盘的瞬间炸出来 —— 磁盘并没有少写东西。代价在模型那一侧：下一轮请求会把这段「自己重复自己」的历史发出去，assistant 的 <code>tool_calls</code> 和配对的 tool 消息各出现两次，配对关系被写坏。严格的 API 会直接拒绝（报错大意是「assistant 的 tool_calls 后面必须紧跟配对的 tool 消息」）；宽松一点的照跑，但上下文被污染、白烧 token。换成 <code>persist</code> 就是内存 3 条 = 磁盘 3 行，永远同步。</p>
+<p>反方向也接得错：<strong>干脆忘了接钩子</strong>（<code>on_append</code> 不传，或传了个什么都不做的函数）。这时内存是对的、磁盘只剩 CLI 自己写的那条用户消息（实测：内存 3 条、磁盘 1 行），<code>--continue</code> 回来就只剩你问的那句话。所以「它怎么忘了刚才说的话」这个症状主要来自这一种；而接成 <code>append_message</code> 的直接后果是内存里的历史被写坏。两种错法方向相反，但都会让两边不一致 —— 这就是为什么要靠契约，而不是靠「看起来对」。</p>
+<p>三个方法的分工记牢，选错一步就掉进上面的坑：</p>
+<ul><li><code>session.append(role, content)</code> —— 「我要新增一条」：<strong>内存 + 磁盘都动</strong>。CLI 把用户输入存进会话时用它。</li><li><code>session.append_message(msg)</code> —— 同上，只是收完整 dict（从磁盘恢复历史时用）。<strong>不能当钩子</strong>：它的 docstring 里就写明了这句。</li><li><code>session.persist(msg)</code> —— 「这条已经在内存里了，我只负责写盘」：<strong>只碰磁盘</strong>。钩子只能用这个。</li></ul>
+<p>根因一句话：<strong>两个对象都以为自己该改内存</strong>。解法是把职责写死成一条契约 —— <strong>循环负责改内存，session 只负责落盘</strong>，谁也不重复对方的活。落到 CLI 上就是那一行 <code>on_append=self.session.persist</code>。</p>
+<p>这个错误可能不会立即报错，却会悄悄破坏历史。关键不变量很简单：一轮完成后，内存中的消息与磁盘上的 JSONL 记录应描述同一份历史。</p>
+<h4 class="mini">另一个 Python 坑：列表身份</h4>
+<p>还有一个类似的陷阱。<code>replace_messages</code> 要整体替换历史，直觉写法是 <code>self.messages = messages</code>。<strong>也是错的</strong>。</p>
+<p>因为 <code>agent_loop</code> 和 CLI 都持有<strong>原来那个 list 对象</strong>。你让 <code>self.messages</code> 指向一个新列表，旧列表仍然被它们拿着 ——之后的 <code>append</code> 会写进一个<strong>已经没人看的列表</strong>，内存与磁盘从此永久脱钩。</p>
+<p>正确写法是 <code>self.messages[:] = messages</code> —— 切片赋值是<strong>就地修改</strong>，所有持有者都能看到新内容。这个区别在 Python 里非常常见，值得单独记住：<strong><code>=</code> 换对象，<code>[:]=</code> 换内容</strong>。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>用 JSONL（一行一条消息），不要一个 JSON 数组</strong>，三个理由：① 追加便宜，直接 append；② 崩溃安全，写第 7 行时断电前 6 行仍可解析；③ 单行坏掉不影响整体。</li>
+<li><strong>这是事件日志思路</strong>：只追加、不修改，当前状态由重放日志算出来。</li>
+<li><strong>两个入口，职责分明</strong>：<code>append</code> 是「新增一条消息」，<code>replace_messages</code> 是「整体重写」（第 6 章压缩要用）。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章新增 <code>session.py</code>，在 <code>agent.py</code> 里加一个 <code>_append</code> 间接层加 <code>on_append</code> 钩子，并在 <code>cli.py</code> 里接上会话。<strong>目标：对话落到磁盘上，关掉终端之后还能 <code>--continue</code> 接着聊</strong>。顺带留出「整体重写历史」的入口，以后要整段换掉历史时有地方下手。</p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">session.py</span><span class="fdesc">一段会话 = 一个 JSONL 文件。六个方法：<code>create</code> / <code>load</code> / <code>append</code> / <code>append_message</code> / <code>persist</code> / <code>replace_messages</code>，外加 <code>list_sessions()</code> 和 <code>latest_session()</code>。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">agent.py</span><span class="fdesc">把散落的历史追加收进 <code>_append()</code>，并新增 <code>on_append</code> 钩子 —— 循环只负责改内存，落盘交给 session。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">cli.py</span><span class="fdesc">启动 / <code>/new</code> / <code>/resume</code> / <code>/list</code> 都走 session；用户输入先落盘再发给模型，请求失败也不会把你说的话弄丢。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：设计 Session 类的基本形状</h5>
+<ul><li>查看 <code>Session</code> 的 id、messages、path，以及 <code>create</code> 如何确定会话文件。</li></ul>
+{{SOURCE:session-17-34|Session 的基本形状}}
+</div>
+<div class="step"><h5>第 2 步：查看会话读取</h5>
+<ul><li><code>Session.load</code> 逐行读取 JSONL，当前基础实现遇到无法解析的行会跳过并提示。</li><li>这里只说明现有实现，不把逐行可解析当成自动修复或完整崩溃恢复保证。</li></ul>
+{{SOURCE:session-36-55|load：坏行直接跳过}}
+</div>
+<div class="step"><h5>第 3 步：写三个写入入口，职责分清</h5>
+<ul><li><code>append</code> 与 <code>append_message</code> 同时修改内存和写盘；<code>persist</code> 只写盘。</li><li>循环已追加消息时，on_append 应使用 persist，避免重复追加。</li></ul>
+{{SOURCE:session-59-80|三个写入入口，别搞混}}
+</div>
+<div class="step"><h5>第 4 步：写 replace_messages，注意两个细节</h5>
+<ul><li><code>replace_messages</code> 用切片替换保持列表对象不变，再通过临时文件重写历史。</li></ul>
+{{SOURCE:session-93-106|Session.replace_messages：整体替换}}<div class="codenote">切片赋值保留原列表对象，避免其他地方仍引用旧列表。</div>
+</div>
+<div class="step"><h5>第 5 步：接到循环和 CLI 上</h5>
+<ul><li><code>mini_agent/agent.py</code> 的 <code>_append</code> 负责通知持久化钩子；<code>App.run_turn</code> 传入 session.persist。</li><li><code>App._open_session</code> 处理恢复参数，<code>App.handle_command</code> 中的 /new、/list、/resume 管理会话。</li></ul>
+{{SOURCE:agent-133-137|_append：追加消息与持久化钩子}}<div class="codenote">循环已经追加消息，持久化钩子只写盘，避免重复追加。</div>
+{{SOURCE:session-119-131|两个小工具：列出所有会话 / 找最近那个}}
+{{SOURCE:cli-74-114|App 的会话初始化与查找}}
+{{SOURCE:cli-135-158|App.run_turn：接入会话}}
+{{SOURCE:cli-187-215|三条会话命令：/new、/list、/resume}}
+</div>
+</div>
+</div><div class="chapter" id="ch6">
+<div class="chead"><span class="cnum">第 6 章</span><h2>上下文压缩</h2><span class="csub">历史太长怎么办</span></div>
+<div class="goal"><b>目标</b>　当估算的 token 逼近模型窗口时，把最老的一段历史压成一段摘要，用摘要替换原文。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>每一轮都要把<strong>全部历史</strong>发给模型，而历史只增不减 —— 迟早撑爆上下文窗口，API 直接报错。就算没爆，越长也越贵越慢。</li>
+<li>压缩本身有个很容易踩的坑：如果切点落在一轮中间，后半段会留下孤儿 <code>role=&quot;tool&quot;</code> 消息，同样导致请求被拒。</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>第 1 章算过那笔账：历史只增不减，而每轮都要把<strong>全部历史</strong>发出去。成本按 N²/2 涨，迟早撞上模型的上下文窗口，API 直接报错。</p>
+<p>压缩的思路很直接：<strong>把最老的一段历史交给模型，让它写成一段摘要，然后用摘要替换原文</strong>。复杂度从 O(N) 降到 O(1)。</p>
+<h4 class="mini">核心难点：切点必须落在「整轮」的边界上</h4>
+<p>压缩要保留最近几轮的原话（细节重要），只压老的。那切点该切在哪？直觉是「切在中间某条消息之前」，但这样会出事：</p>
+<pre class="ascii">如果你切在这里 ↓
+  assistant {tool_calls:[{id: &quot;call_A&quot;}]}   ← 被压掉了
+  tool      {tool_call_id: &quot;call_A&quot;, ...}   ← 保留下来
+
+历史里就出现了一条没有 assistant 配对 tool_calls 的 role=&quot;tool&quot; 消息 → API 拒绝</pre>
+<p>又是第 1 章那条协议约束。所以切点必须落在<strong>一轮的开头</strong>。</p>
+<p>那「一轮」怎么定义？一轮 = 一条 user 提问 + 它引发的所有 assistant 工具调用 + 对应的 <code>role=&quot;tool&quot;</code> 结果 + 收尾的 assistant 文字。而判据要看仔细 —— OpenAI 里工具结果是<strong>独立的 <code>role=&quot;tool&quot;</code> 消息</strong>，不是 <code>user</code>：</p>
+<pre class="ascii">{&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;帮我改一下 config&quot;}       ← 新一轮开头 ✓
+{&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: ..., &quot;tool_calls&quot;: [{...}]}
+{&quot;role&quot;: &quot;tool&quot;,       &quot;tool_call_id&quot;: &quot;call_A&quot;, ...}         ← 独立的 tool 角色
+{&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;改好了&quot;}</pre>
+<p>好在判据依然很简单：<strong>新提问是 <code>role == &quot;user&quot;</code> 且 <code>content</code> 是纯字符串</strong>。工具结果是 <code>role=&quot;tool&quot;</code>，天然不会被当成一轮的开头 —— 所以判据 <code>role == &quot;user&quot; and isinstance(content, str)</code> 干净可靠，那层「靠 content 类型区分」的麻烦在 OpenAI 协议里已经不存在了。</p>
+<p><strong>这个 <code>is_turn_start</code> 是全部压缩逻辑的基础</strong> —— 写错了不会报错，只会切在不该切的地方，然后在下次请求时炸掉。</p>
+<h4 class="mini">保留最近几轮：留几轮、怎么定</h4>
+<p>切点定下来，还剩一个参数要定：<strong>保留多少</strong>。留得少省得多，但留在上下文里的原文也少 —— 这一节讲这个数怎么取舍。</p>
+<p>教程版的做法最省事：把「保留几轮」写成一个常数 —— 配置里的 <code>compaction_keep_recent_turns</code>（默认 3）。<code>find_cut_index</code> 先把历史里所有「轮的开头」收集起来，从后往前数到第 3 个，切在它前面：</p>
+<pre class="ascii">turn_starts = [0, 5, 11, 18, 24]        # 历史里 5 个「轮的开头」
+keep = 3
+cut = turn_starts[len(turn_starts) - keep] = turn_starts[2] = 11
+
+  messages[:11] 拿去写摘要，messages[11:] 原样保留
+  轮数不够（len(turn_starts) &lt;= keep）→ 返回 None：没什么可压的</pre>
+<p><strong>为什么是 3？</strong> 没有推导，是拍的 —— 够装下「正在做的那件事」就行。真正值得讲的是<strong>这个数该按什么取舍</strong>。</p>
+<p><strong>先看一个容易走偏的直觉</strong>：既然目的是别超窗口，那「压到刚好低于阈值」不是最省吗？不是。因为压缩不是一次性动作，而是<strong>会反复发生</strong>的 —— 只压到贴着阈值，下一轮的回答加工具输出立刻把体积推回去，于是每轮都要再压一次；摘要叠摘要，上下文很快退化成一层层转述。</p>
+<p>所以真正要问的不是「压多少才不超窗口」，而是<strong>「压完之后还能自由地跑几轮」</strong>。这就是「保留最近几轮」的实质：<strong>留出一段完整轮的原文当工作区</strong>，让接下来几轮都不必立刻再压。</p>
+<p>那用什么单位量这段工作区？三种单位都有真实产品在用，取舍不同：</p>
+<ul><li><strong>按条数</strong>（保留最近 N 条消息）：实现最简单，但一轮的条数是浮动的 —— 一次带工具的问答可能 2 条，也可能 30 条，实际保留量能差几十倍。</li><li><strong>按轮数</strong>（保留最近 N 轮）：保留量随「轮的大小」波动，但轮是用户能感知的单位，翻日志、讲给别人听都说得清（「最近 3 次提问还在原文里」）。教程版走这条。</li><li><strong>按 token 预算</strong>（留够约 M 个 token 的最近历史）：最贴近真实约束，实际保留的轮数会自动适应 —— 聊得啰嗦就少留几轮，聊得紧凑就多留几轮；代价是要能算 token，而且切点可能落在轮中间，得额外处理「被切开的半轮」。</li></ul>
+<p>不管用哪种单位，三条原则是共同的：</p>
+<ul><li><strong>只压老的，不碰新的</strong>：正在做的事、刚才那次工具调用的原始输出，都躺在最近几轮里；摘要一定会丢细节，所以这段必须留原文。</li><li><strong>保留的单位要是完整的轮</strong>：留半轮等于制造一条配不上对的 <code>tool</code> 消息（上一节那条约束）。</li><li><strong>判据是「工作区够不够用」，不是「token 数够不够低」</strong>：标准是 —— 模型接着干活时，要不要回头向你要原始信息。</li></ul>
+<p>两边的真实实现都在下面，点开看源码和提取出来的字符串 —— 它们的取舍比教程版讲究，但也更复杂。</p>
+<details class="foldwrap"><summary><span class="sumcap">pi：按 token 预算从末尾回溯（默认留 20000 token）</span><span class="foldhint">点击展开原文</span></summary><pre class="ascii">// 1) 默认值：packages/coding-agent/src/core/settings-manager.ts:18-28
+const DEFAULT_COMPACTION_TOKEN_SETTINGS: Required&lt;CompactionModelOverride&gt; = {
+	reserveTokens: 16384,
+	keepRecentTokens: 20000,
+};
+
+export interface CompactionSettings {
+	enabled?: boolean; // default: true
+	reserveTokens?: number; // default: 16384
+	keepRecentTokens?: number; // default: 20000
+	modelOverrides?: Record&lt;string, CompactionModelOverride&gt;; // exact &quot;provider/modelId&quot; keys
+}
+
+// 2) 什么时候压：packages/agent/src/harness/compaction/compaction.ts:245-249
+/** Return whether context usage exceeds the configured compaction threshold. */
+export function shouldCompact(contextTokens: number, contextWindow: number, settings: CompactionSettings): boolean {
+	if (!settings.enabled) return false;
+	return contextTokens &gt; contextWindow - settings.reserveTokens;
+}
+
+// 3) 切点长什么样：compaction.ts:359-367 —— 它允许「切开一轮」
+/** Cut point selected for compaction. */
+export interface CutPointResult {
+	/** Index of the first entry retained after compaction. */
+	firstKeptEntryIndex: number;
+	/** Index of the turn-start entry when the cut splits a turn, otherwise -1. */
+	turnStartIndex: number;
+	/** Whether the selected cut point splits an in-progress turn. */
+	isSplitTurn: boolean;
+}
+
+// 4) 留多少：compaction.ts:369-418
+//    从末尾往前累加「估算 token」，一旦达到 keepRecentTokens，
+//    就选「不小于当前下标」的第一个合法切点
+/** Find the compaction cut point that keeps approximately the requested recent-token budget. */
+export function findCutPoint(
+	entries: Entry[],
+	startIndex: number,
+	endIndex: number,
+	keepRecentTokens: number,
+): CutPointResult {
+	const cutPoints = findValidCutPoints(entries, startIndex, endIndex);
+
+	if (cutPoints.length === 0) {
+		return { firstKeptEntryIndex: startIndex, turnStartIndex: -1, isSplitTurn: false };
+	}
+	let accumulatedTokens = 0;
+	let cutIndex = cutPoints[0];
+
+	for (let i = endIndex - 1; i &gt;= startIndex; i--) {
+		const entry = entries[i];
+		if (entry.type !== &quot;message&quot;) continue;
+		const messageTokens = estimateTokens(entry.message as AgentMessage);
+		accumulatedTokens += messageTokens;
+		if (accumulatedTokens &gt;= keepRecentTokens) {
+			for (let c = 0; c &lt; cutPoints.length; c++) {
+				if (cutPoints[c] &gt;= i) {
+					cutIndex = cutPoints[c];
+					break;
+				}
+			}
+			break;
+		}
+	}
+	while (cutIndex &gt; startIndex) {
+		const prevEntry = entries[cutIndex - 1];
+		if (prevEntry.type === &quot;compaction&quot;) {
+			break;
+		}
+		if (prevEntry.type === &quot;message&quot;) {
+			break;
+		}
+		cutIndex--;
+	}
+	const cutEntry = entries[cutIndex];
+	const isUserMessage = cutEntry.type === &quot;message&quot; &amp;&amp; cutEntry.message.role === &quot;user&quot;;
+	const turnStartIndex = isUserMessage ? -1 : findTurnStartIndex(entries, cutIndex, startIndex);
+
+	return {
+		firstKeptEntryIndex: cutIndex,
+		turnStartIndex,
+		isSplitTurn: !isUserMessage &amp;&amp; turnStartIndex !== -1,
+	};
+}</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">Codex（0.156.0）：整段换成交接摘要，不留最近几轮原文</span><span class="foldhint">点击展开原文</span></summary><pre class="ascii">// 配置里能调的旋钮（同处出现的源码路径：core/src/compact.rs、core/src/compact_token_budget.rs）
+model_context_window
+model_auto_compact_token_limit
+model_auto_compact_token_limit_scope
+// 上一条的取值：total | body_after_prefix
+model_post_turn_compact_threshold_percent
+compact_prompt
+
+// 摘要注入新窗口时，套在最前面的固定前缀（全文）
+Another language model started to solve this problem and produced a summary of its thinking process. You also have access to the state of the tools that were used by that language model. Use this to build on the work that has already been done and avoid duplicating work. Here is the summary produced by the other language model, use the information in this summary to assist with your own analysis:
+
+// 压完仍然超窗口时，逐条丢掉最老的历史项（原文这句以 &quot;Error: &quot; 加一个空格结尾，后面接具体报错）
+Context window exceeded while compacting; removing oldest history item. Error:
+
+// 多次压缩后的提醒，以及拿不到摘要时的占位
+Heads up: Long threads and multiple compactions can cause the model to be less accurate. Start a new thread when possible to keep threads small and targeted.
+Post-turn compaction completed without an assistant summary
+(no summary available)
+
+// 窗口彻底耗尽前的兜底提示（TokenBudgetConfigToml.auto_compact_fallback_prompt，全文）
+&lt;context_window_reminder&gt;
+The current context window is exhausted. Do not continue the task or give a final answer in this window. The next window will not automatically include this conversation. Make exactly one write or append call to `notes` now to save a concise checkpoint with the goal, decisions, progress, learnings, next steps, and the window ID and item ID of every relevant user request still being solved, as well as important actions/tool calls for future reference. Note that every non-assistant item, such as user, developer, tool response, has an item id `[id: ...]` that is immediately after its item content. After the notes result returns, call `functions.new_context`; do not use any tools other than `notes` and `functions.new_context`.
+&lt;/context_window_reminder&gt;
+
+// 配套默认值
+&quot;auto_compact_fallback_buffer_tokens&quot;: 16384
+
+// 常驻提示 guidance_message 的头两段（后面还有一段讲 context reset，此处略）
+For tasks that may span context windows, use `notes` to maintain a concise checkpoint of the goal, decisions, progress, learnings and next steps. Include the window ID and item ID for every relevant user request you are currently solving as well as important actions/tool calls. You can use `history` tool to look up details with the references later. Note that every non-assistant item, such as user, developer, tool response, has an item id `[id: ...]` that is immediately after its item content. Relative note paths belong to the current thread; absolute paths may read other threads&#x27; notes, but writes are limited to the current thread.
+
+It is a good idea to take incremental notes while you work so that you do not miss any important info. You can also use `get_context_remaining` tool to find the remaining token budget for better planning. Once the token budget is exhausted, you will lose access to the current window and continue in a fresh context window and you can only recover through `notes` and `history` tools. So be careful not to over-run the context window without any documentation.</pre></details>
+<p>三种路线摆在一起：<strong>教程版</strong>固定轮数，判据最粗，但一眼能懂、好改；<strong>pi</strong> 按 token 预算从末尾回溯，保留量自适应，代价是要处理「切在轮中间」的半轮；<strong>Codex</strong> 干脆不留原文 —— 整段历史换成一份交接摘要，注入时前面套一段固定前缀（「另一个语言模型已经解过这个问题……用这份摘要辅助你自己的分析」），压完仍超窗口就逐条丢掉最老的历史项，并在窗口彻底耗尽前要求模型先把 checkpoint 写进 <code>notes</code> 工具（因为下一个窗口不会自动带上这段对话）。</p>
+<p><strong>一句提醒</strong>：压缩终究是「丢信息」的操作，只是丢得聪明。跨很多轮才用得到的约束、路径、结论，最好在它出现的那一轮就落到项目里的文件（<code>AGENTS.md</code>、笔记、测试），不要指望摘要替你记住。</p>
+<h4 class="mini">token 估算：三条都要数到</h4>
+<p>要精确知道有多少 token，得用对应模型的 tokenizer 逐字计算。那意味着引入依赖、而且换模型就要换 tokenizer。</p>
+<p>这里用 <code>字符数 / 3</code> 就够了 —— 对中英文混排是个粗糙但可用的近似。关键是要<strong>留足余量</strong>：估多了顶多提前压一次（浪费一点钱），估少了就会真的超窗口然后请求失败。</p>
+<p>但「字符数」只算了 <code>content</code>。<strong>一个会漏算的地方</strong>：assistant 的 <code>tool_calls</code>（每个调用的函数名 + arguments）以及 <code>role=&quot;tool&quot;</code> 消息的 <code>tool_call_id</code>，它们同样要占 token。漏了它们，history 的实际容量会被低估，压缩时机就会被推迟。</p>
+<p>所以配置里要有一个 <code>compaction_reserve_tokens</code>（预留量），触发条件是 <code>估算值 &gt; 上限 - 预留量</code>，而不是 <code>&gt; 上限</code>。</p>
+<h4 class="mini">摘要的质量由提示词决定</h4>
+<p>如果只说「总结一下这段对话」，模型很可能写成给人看的散文，把文件路径、函数名、决策理由全丢了 —— <strong>而那些恰恰是后续对话真正要用的</strong>。</p>
+<p>所以摘要指令（<code>SUMMARY_INSTRUCTION</code>）必须明确要求：</p>
+<ul><li><strong>逐字保留</strong>文件路径、函数名、变量名、错误信息。</li><li>保留<strong>做过的决定和理由</strong>（&quot;选了 A 而不是 B，因为...&quot;）。</li><li><strong>写成给未来自己的笔记</strong>，不要写成散文。</li><li>不要客套话、不要复述问题、不要总结「用户想要什么」。</li></ul>
+<p>这段提示词的质量<strong>直接决定压缩之后 agent 还记不记得住关键信息</strong>。值得反复调整。</p>
+<p>上面四条要求说得抽象，<strong>看真东西最清楚</strong>。下面是三段真实提示词的原文 —— 教程版的、pi 的、以及 Codex 的。点开对照着读，比反复推敲形容词有用。</p>
+<details class="foldwrap"><summary><span class="sumcap">教程版：<code>SUMMARY_INSTRUCTION</code>（<code>mini_agent/compaction.py</code>）</span><span class="foldhint">点击展开原文</span></summary><pre class="ascii">You are compacting a coding session so it can continue in a fresh context.
+Write a dense handoff summary of the conversation below.
+
+You MUST preserve, verbatim where possible:
+- file paths that were read or modified
+- names of functions, classes, variables that were changed
+- decisions made and the reason for them
+- what is still unfinished
+
+Do NOT include chit-chat. Do NOT invent anything not present below.
+Write it as notes to your future self, not as prose for a human.</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">pi：<code>SUMMARIZATION_SYSTEM_PROMPT</code> + <code>SUMMARIZATION_PROMPT</code>（<code>packages/agent/src/harness/compaction/compaction.ts</code>）</span><span class="foldhint">点击展开原文</span></summary><pre class="ascii">── system ──
+You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.
+
+Do NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.
+
+── user ──
+The messages above are a conversation to summarize. Create a structured context checkpoint summary that another LLM will use to continue the work.
+
+Use this EXACT format:
+
+## Goal
+[What is the user trying to accomplish? Can be multiple items if the session covers different tasks.]
+
+## Constraints &amp; Preferences
+- [Any constraints, preferences, or requirements mentioned by user]
+- [Or &quot;(none)&quot; if none were mentioned]
+
+## Progress
+### Done
+- [x] [Completed tasks/changes]
+
+### In Progress
+- [ ] [Current work]
+
+### Blocked
+- [Issues preventing progress, if any]
+
+## Key Decisions
+- **[Decision]**: [Brief rationale]
+
+## Next Steps
+1. [Ordered list of what should happen next]
+
+## Critical Context
+- [Any data, examples, or references needed to continue]
+- [Or &quot;(none)&quot; if not applicable]
+
+Keep each section concise. Preserve exact file paths, function names, and error messages.</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">Codex（0.156.0）：压缩提示词 —— 从本机 <code>codex.exe</code> 里提取的字符串，同处出现的源码路径是 <code>core/src/compact.rs</code></span><span class="foldhint">点击展开原文</span></summary><pre class="ascii">You are performing a CONTEXT CHECKPOINT COMPACTION. Create a handoff summary for another LLM that will resume the task.
+
+Include:
+- Current progress and key decisions made
+- Important context, constraints, or user preferences
+- What remains to be done (clear next steps)
+- Any critical data, examples, or references needed to continue
+
+Be concise, structured, and focused on helping the next LLM seamlessly continue the work.</pre></details>
+<p>三份摆在一起，差别一眼可见：</p>
+<ul><li><strong>教程版只给清单</strong>：告诉它「必须逐字保住什么」，格式随模型发挥。最短、最好抄；代价是每次压出来的形状不一定一样。</li><li><strong>pi 把格式钉死了</strong>：六段固定小标题（Goal / Constraints &amp; Preferences / Progress / Key Decisions / Next Steps / Critical Context），每段还给一行方括号写好的「这里该填什么」，末尾再强调一次保留精确的路径、函数名、错误信息。它另有两句 <code>Do NOT continue the conversation</code> —— 防止模型把「摘要请求」当新任务接着往下聊。</li><li><strong>Codex 最短</strong>：第一句先说清这是什么任务（<code>CONTEXT CHECKPOINT COMPACTION</code>），第二段给四条 <code>Include</code>。它把「读者是谁」直接写进第一句 —— 这是给接着干活的另一个 LLM 的交接摘要。</li><li><strong>三家都写的两件事</strong>：说清摘要给谁看；点名必须保留路径、名字、决定、未完成的事。区别只在格式约束有多硬 —— 教程版靠清单，pi 靠模板，Codex 靠一句话加四条。</li><li>pi 还多一份<strong>增量版</strong>（<code>UPDATE_SUMMARIZATION_PROMPT</code>）：第二次以后压缩时，把新消息并进上一版摘要，而不是把新旧历史从头再压一遍 —— 它的第一条规则就是 <code>PRESERVE all existing information from the previous summary</code>。想省 token 的话，这一招比任何措辞优化都有效。</li></ul>
+<h4 class="mini">两个设计细节</h4>
+<p><strong>摘要用 <code>role=&quot;user&quot;</code>，不用 <code>assistant</code></strong>。对模型来说，「这些是背景信息」更像是一条用户交代的前提，而不是它自己说过的话。用 assistant 会让它以为那是自己的结论。</p>
+<p><strong>摘要请求是一次独立的一次性请求</strong>，不往当前对话里追加。否则你压缩历史的行为本身又在增长历史，很荒谬。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>切点必须落在「整轮」的边界上</strong>。一轮 = 一条 user 提问 + 它引发的所有 assistant（含 <code>tool_calls</code>）与 <code>role=&quot;tool&quot;</code> 结果。判据是：role == &quot;user&quot; 且 content 是<strong>纯字符串</strong>（工具结果有自己的 <code>role=&quot;tool&quot;</code>，天然不会误判；只有 user + 字符串才算新一轮开头）。</li>
+<li><strong>不精确数 token，用估算</strong>。精确要按各家分词器算。这里用 字符数/3 就够 —— 只要留够余量兜住误差。估多一点比估少安全。</li>
+<li><strong>摘要由模型来写，并且要明确告诉它目的</strong>。只说「总结一下」，它可能写成给人看的散文，丢掉文件路径和函数名 —— 而那些恰恰是后续对话真正要用的。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章新增 <code>compaction.py</code>，并在 <code>agent.py</code> 里加一个 <code>before_request</code> 钩子把压缩接进循环。<strong>目标：当估算的 token 逼近窗口上限时，把最老的一段历史压成一条摘要</strong>，让长对话既不撞 API 的硬限制，也不至于越聊越贵越慢。另外在 <code>cli.py</code> 里加一个 <code>/compact</code> 命令，不用等它自动触发，随时能手动压一次。</p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">compaction.py</span><span class="fdesc"><code>estimate_tokens()</code> 粗估 token，<code>is_turn_start()</code> / <code>find_cut_index()</code> 找安全的切点，<code>compact()</code> / <code>summarize()</code> 做压缩。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">agent.py</span><span class="fdesc">新增 <code>make_compaction_hook()</code>：每轮请求前判断要不要压，压完用 <code>messages[:] = ...</code> <strong>就地</strong>替换历史 —— 保证调用方看到的还是同一个列表对象。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">cli.py</span><span class="fdesc">把钩子的组装收成一个方法 <code>_make_before_request()</code>：压缩真的发生后顺手把新历史落盘，避免重启回到压缩前；再加 <code>/compact</code> 命令，随时手动压一次。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：写 token 估算</h5>
+<ul><li><code>estimate_tokens</code> 汇总消息、工具名和参数的字符数，做近似 token 估算。</li></ul>
+{{SOURCE:compaction-32-59|token 估算}}
+</div>
+<div class="step"><h5>第 2 步：写轮的判据（关键）</h5>
+<ul><li><code>is_turn_start</code> 用 user 角色和字符串内容识别新一轮；工具结果使用 tool 角色。</li></ul>
+{{SOURCE:compaction-66-71|轮的判据 is_turn_start（关键）}}
+</div>
+<div class="step"><h5>第 3 步：写切点计算</h5>
+<ul><li><code>find_cut_index</code> 从轮次开头中选切点，保留最近若干轮。</li></ul>
+{{SOURCE:compaction-74-91|切点计算 find_cut_index}}
+</div>
+<div class="step"><h5>第 4 步：写 compact 和 summarize</h5>
+<ul><li><code>compact</code> 把旧历史交给 summarize，保留近期原文，再返回新列表。</li><li><code>summarize</code> 用独立请求生成摘要，<code>_render</code> 负责组织输入文本。</li></ul>
+{{INLINE:compaction-138-157|渲染摘要输入的 _render}}
+<p class="exnote">这段直接来自当前 compaction.py 的 _render 函数。</p>
+{{SOURCE:compaction-13-25|摘要指令的措辞}}
+{{SOURCE:compaction-98-135|压缩主流程 compact / summarize}}
+</div>
+<div class="step"><h5>第 5 步：接进循环，注意「就地替换」</h5>
+<ul><li><code>make_compaction_hook</code> 把返回新列表的接口包装成就地替换，<code>agent_loop</code> 在请求前调用它。</li><li><code>App._make_before_request</code> 在历史长度变化后写回磁盘；/compact 的分支在 App.handle_command 中。</li></ul>
+{{SOURCE:agent-256-280|接进循环要用「就地替换」}}
+{{SOURCE:agent-188-193|循环里的插入点：每轮问模型之前}}
+{{SOURCE:cli-116-131|把压缩钩子包一层，顺便落盘}}
+{{SOURCE:cli-223-228|手动压缩命令 /compact}}
+</div>
+</div>
+</div><div class="chapter" id="ch7">
+<div class="chead"><span class="cnum">第 7 章</span><h2>系统提示词与技能</h2><span class="csub">让它知道自己在哪</span></div>
+<div class="goal"><b>目标</b>　把写死的系统提示词变成「骨架 + 动态环境 + 外部技能文件」三段拼接。</div>
+<h3 class="sub">要解决的问题</h3><ul>
+<li>前面几章的提示词是一行写死的字符串。它不知道今天是几号、在哪个目录、跑在什么系统上。</li>
+<li>想给 agent 加一点项目专属的知识（比如本项目的提交信息规范），难道每次都要改代码？</li>
+</ul>
+<h3 class="sub">原理</h3><div class="theory">
+<p>前六章的系统提示词是一行写死的字符串。它有两个明显不足：<strong>不知道自己在哪</strong>（今天几号、在哪个目录、什么系统），<strong>也没法扩展</strong>（想加项目专属知识就得改代码）。</p>
+<p>这一章把它变成三段拼出来的东西。看起来简单，但三个设计点都有实际理由。</p>
+<h4 class="mini">为什么要分三层，以及顺序为什么有讲究</h4>
+<p>大模型对上下文不同位置的注意力<strong>不是均匀的</strong> ——开头和结尾最强，中间最弱（这就是所谓的「lost in the middle」）。</p>
+<p>所以排布要按「重要性 × 稳定性」来定：</p>
+<ul><li><strong>第 1 层 · 骨架</strong>：最关键的约束（你该怎么干活、怎么说话），放<strong>最前面</strong>。比如「Read before you write」这一条，能显著减少模型凭想象改文件的情况。</li><li><strong>第 3 层 · 技能</strong>：项目专属知识，放<strong>最后面</strong>（靠近结尾，注意力也强）。</li><li><strong>第 2 层 · 环境</strong>夹在中间。它是纯事实、不需要模型特别关注，放在中间最合适。</li></ul>
+<p><strong>骨架要写「风格」，不要写「知识」</strong>。「你应该先读再写」是风格，任何项目都成立；「这个项目的提交信息要用中文」是知识，应该做成技能文件。</p>
+<h4 class="mini">环境信息：两种「缓存」要分开看</h4>
+<p>这里要区分两件事：本地保存环境信息，是为了少读、少算；服务端的提示词缓存，是为了复用已经计算过的请求前缀。前者要考虑信息是否过期，后者要考虑前缀是否稳定。</p>
+<ul><li><strong>本地缓存可以用，但要有更新时机</strong>。平台信息通常比较稳定；目录、日期、权限等发生变化时，需要重新采集。不能简单地把所有环境信息存一次就一直使用，也不必把所有字段每次都重算。</li><li><strong>服务端缓存复用相同的前缀</strong>。靠前的内容变化，会影响包含这处变化的较长前缀；变化之前的稳定部分仍有机会复用。实际命中还取决于模型、缓存边界、长度门槛、保留时间和请求路由，不能保证一天内一直命中。</li></ul>
+<p><strong>这里的基础实现</strong>：<code>environment_block()</code> 每次被调用时读取目录、平台和日期，但 CLI 在创建 <code>App</code> 时只调用一次 <code>build_system_prompt()</code>，后续请求复用 <code>self.system_prompt</code>。因此它实际上是一份启动时快照，长会话跨天后不会自动更新。这里保留这份简单实现。</p>
+<h4 class="mini">更好的做法：固定指令保持稳定，环境变化作为后续上下文补充</h4>
+<p>Codex 的公开源码提供了一个可以参考的做法：<strong>把环境当成有状态的上下文，保存快照、比较变化，再生成更新片段</strong>。这样既能给模型较新的事实，也能尽量保留之前已经发送的内容。</p>
+<ul><li><strong>先建立环境快照</strong>：<code>EnvironmentsState</code> 保存工作目录、shell、日期、时区、网络和文件系统权限等信息；首次没有旧快照时，按空状态比较，生成需要的环境上下文。</li><li><strong>后续比较变化</strong>：<code>render_diff()</code> 对照上次快照，目录或其他环境字段变化时生成更新；没有相关变化时，不生成环境片段。多环境场景还会区分新增、变化和不可用的环境。</li><li><strong>环境事实作为独立上下文</strong>：更新渲染成带 <code>&lt;environment_context&gt;</code> 标签的 <code>user</code> 角色片段。这里的 user 角色是客户端组织上下文的方式，并不表示这段内容是用户手写的。日期也在快照比较中，不能笼统说成“时间完全不进环境上下文”。</li></ul>
+<p>如果继续扩展这里的 agent，可以采用一个小一点的版本：<strong>固定骨架和当前会话使用的技能组成稳定指令；开始会话时补一份环境说明；每轮开始时检查目录、日期等字段，变化时在历史后面追加更新，并明确以最新环境说明为准</strong>。不要为了更新时间，反复改写历史开头那份提示词。压缩历史或恢复会话后，也要确保模型仍能看到有效的当前环境。</p>
+<p>例如：昨天的环境说明和已有对话保留原样，跨天后补一条“当前日期已更新为……”；切换目录后补一条新的目录说明。需要精确时间的任务，可以按需读取时钟。这样不必把每秒变化的时间戳放进固定指令。</p>
+<p>这种组织方式<strong>有利于保留可复用前缀，但不保证缓存命中</strong>。真正是否命中，应看 API 返回的 <code>cached_tokens</code>；具体字段和计费、缓存设置以所用模型及服务商的文档为准。这里使用兼容 Chat Completions 的接口，也不能假定所有后端都采用 OpenAI 的缓存规则。</p>
+<p>参考：<a href="https://github.com/openai/codex/blob/a9b0815167c27ab13719dd12d13b63e02b70d221/codex-rs/core/src/context/world_state/environment.rs#L112" target="_blank" rel="noreferrer">Codex 环境快照与差异更新源码</a>（核对于 2026-10-12）；<a href="https://developers.openai.com/api/docs/guides/prompt-caching" target="_blank" rel="noreferrer">OpenAI 提示词缓存文档</a>。这是可选的改进方向，下面的代码仍使用启动时组装提示词的基础写法。</p>
+<h4 class="mini">技能：为什么是文件，而不是代码</h4>
+<p>一个「技能」就是一个 markdown 文件，讲清某类任务该怎么做。比如 <code>git-commit.md</code> 里写好本项目的提交信息规范。</p>
+<p>选择文件而不是代码，有三个好处：</p>
+<ul><li><strong>改它不需要碰代码</strong>，也不需要重新验证程序。写文档的人不用会写 Python。</li><li><strong>可以按项目分别准备</strong>：换一个项目就换一套 <code>skills/</code> 目录。</li><li><strong>内容是自然语言</strong>，正好是模型最擅长理解的形式。你不需要定义任何 schema。</li></ul>
+<p>这里还有个重要的设计原则：<strong>技能是可选增强，缺了不能报错</strong>。目录不存在时返回空列表，单个文件读不了就跳过。一个增强功能的失败不应该阻断主流程 ——这和第 2 章「工具失败要返回错误文本而不是崩溃」是同一种思路。</p>
+<h4 class="mini">一个容易被忽略的点</h4>
+<p>系统提示词是<strong>每次请求都发</strong>的。所以它越长，每一轮的固定开销就越大。</p>
+<p>这意味着把整个项目的文档塞进技能文件是个坏主意。技能应该写<strong>精炼的规则</strong>（「提交信息用中文，第一行不超过 50 字」），而不是<strong>背景资料</strong>。</p>
+<p>顺带一提：这也解释了为什么真实的 coding agent 会把工具说明放在工具声明里（按需）、把项目文档做成可检索的（agent 自己去读），而不是全塞进系统提示词。<strong>系统提示词的每一行都在为整个会话付费</strong>。</p>
+</div>
+<h3 class="sub">设计取舍</h3><ul>
+<li><strong>分三层，顺序有讲究</strong>：骨架（最关键的约束）放最前，易变的背景信息放后面 —— 模型的注意力在开头和结尾最强。</li>
+<li><strong>环境信息按调用时采集</strong>：构造提示词时采集日期、目录和平台；当前 CLI 在启动时构造一次，后续请求复用这份快照。</li>
+<li><strong>技能就是 skills/*.md 文件</strong>。改一个 markdown 不需要碰代码，而且可以按项目分别准备。目录不存在时返回空列表 —— 技能是可选增强，缺了不能报错。</li>
+</ul>
+<h3 class="sub">本章新增或修改</h3><p class="codeov">本章新增 <code>prompt.py</code>，并在 <code>cli.py</code> 里把写死的提示词换成 <code>build_system_prompt()</code>。<strong>目标：把系统提示词从一行字符串变成「固定骨架 + 动态环境 + 磁盘上的技能文件」三段拼接</strong> —— 以后加项目专属知识只要放一个 .md，不用碰代码。</p><div class="files"><div class="frow"><span class="tag new">新增</span><span class="mono">prompt.py</span><span class="fdesc"><code>BASE_PROMPT</code>（骨架）、<code>environment_block()</code>（每次重算的日期/目录/系统）、<code>load_skills()</code> + <code>skills_block()</code>（从 <code>skills/*.md</code> 加载）、<code>build_system_prompt()</code>（拼装）、<code>describe()</code>（查看加载情况）。</span></div><div class="frow"><span class="tag mod">修改</span><span class="mono">cli.py</span><span class="fdesc">启动时算一次提示词并复用；<code>/skills</code> 命令列出当前加载了哪些技能文件。</span></div></div>
+<h3 class="sub">怎么实现</h3><div class="steps">
+<div class="step"><h5>第 1 步：写第 1 层，骨架</h5>
+<ul><li>查看 <code>mini_agent/prompt.py</code> 的 BASE_PROMPT，固定的行为约定放在这里。</li></ul>
+{{SOURCE:prompt-16-29|第 1 层：骨架}}
+</div>
+<div class="step"><h5>第 2 步：写第 2 层，环境信息</h5>
+<ul><li><code>environment_block</code> 读取当前目录、平台和日期，拼成环境信息。</li></ul>
+{{SOURCE:prompt-32-39|第 2 层：环境信息}}
+</div>
+<div class="step"><h5>第 3 步：写第 3 层，从磁盘加载技能</h5>
+<ul><li><code>load_skills</code> 读取 skills 目录中的 Markdown 文件，<code>skills_block</code> 拼接正文。</li></ul>
+{{SOURCE:prompt-51-87|第 3 层：从磁盘加载技能}}
+</div>
+<div class="step"><h5>第 4 步：拼起来</h5>
+<ul><li><code>build_system_prompt</code> 按骨架、环境、技能的顺序拼接。</li><li>提示词要求模型跟随用户使用的语言；CLI 固定使用英文。</li></ul>
+{{SOURCE:prompt-90-94|拼起来}}
+</div>
+<div class="step"><h5>第 5 步：在 CLI 里接上</h5>
+<ul><li><code>App.__init__</code> 加载技能并构造 system_prompt，run_turn 将它传给 agent_loop。</li><li><code>App.handle_command</code> 中的 /skills 分支显示已加载的技能。</li></ul>
+{{SOURCE:cli-74-83|在 CLI 里接上}}
+{{SOURCE:cli-216-222|技能查看命令 /skills}}
+</div>
+</div>
+</div>
+<footer><div class="series-bridge"><b>从第7章继续</b><p>mini agent-2 从一次模型请求失败开始，接入重试、恢复与执行授权。它使用同一代码包的 mini_agent.advanced 入口；原交互入口仍然保留。</p><a href="advanced-guide.zh-CN.html#ch8">mini agent-2 · 第8章：失败与重试 →</a></div>
+  启动：<code>python -m mini_agent</code>　·
+  <a href="LICENSE">MIT 许可证</a> · <a href="THIRD_PARTY_NOTICES.md">引用声明</a>
+</footer>
+<script>
+
+(function () {
+  'use strict';
+
+  function codeText(details) {
+    var pre = details.querySelector('td.code pre');
+    if (!pre) {
+      var all = details.querySelectorAll('.codeblock pre');
+      for (var i = 0; i !== all.length; i++) {
+        if (!all[i].closest('.linenodiv')) { pre = all[i]; break; }
+      }
+    }
+    if (!pre) { return null; }
+
+    return pre.textContent.replace(/[\s\u00a0]+$/, '') + '\n';
+  }
+
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', 'readonly');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function flash(btn, ok) {
+    if (btn._flashTimer) { clearTimeout(btn._flashTimer); }
+    btn.textContent = ok ? '已复制 ✓' : '复制失败';
+    btn.className = ok ? 'copybtn done' : 'copybtn bad';
+    btn._flashTimer = setTimeout(function () {
+      btn.textContent = '复制';
+      btn.className = 'copybtn';
+    }, 1300);
+  }
+
+
+  function copyFind(el) {
+    var text = el.textContent;
+    var mark = document.createElement('span');
+    mark.className = 'locok';
+    function done(ok) {
+      mark.textContent = ok ? '已复制 ✓' : '复制失败';
+      if (!mark.parentNode) { el.parentNode.appendChild(mark); }
+      setTimeout(function () {
+        if (mark.parentNode) { mark.parentNode.removeChild(mark); }
+      }, 1300);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { done(true); },
+        function () { done(legacyCopy(text)); }
+      );
+    } else {
+      done(legacyCopy(text));
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    if (!el || !el.closest) { return; }
+    var fc = el.closest('.loc code');
+    if (fc) { ev.preventDefault(); copyFind(fc); return; }
+    var btn = el.closest('.copybtn');
+    if (!btn) { return; }
+    ev.preventDefault();
+
+    var details = btn.closest('details');
+    var text = details ? codeText(details) : null;
+    if (text === null) { flash(btn, false); return; }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { flash(btn, true); },
+        function () { flash(btn, legacyCopy(text)); }
+      );
+    } else {
+      flash(btn, legacyCopy(text));
+    }
+  }, false);
+})();
+</script>
+
+</div>
+<script>(()=>{const offset=()=>document.documentElement.style.setProperty('--series-offset',Math.ceil(document.querySelector('.top').getBoundingClientRect().height)+24+'px');offset();addEventListener('resize',offset);const link=document.querySelector('.series-language');const target=link.dataset.target;const sync=()=>{const url=new URL(target,location.href);url.hash=location.hash;link.href=url.href};sync();addEventListener('hashchange',sync)})();</script>
+</body>
+</html>

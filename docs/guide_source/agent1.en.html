@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>mini agent-1 · Implementation guide</title>
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f7f8fa; --bg3:#eef1f6; --fg:#1f2430; --dim:#5c6678;
+  --line:#e3e7ef; --accent:#2563eb; --accent2:#15803d; --warn:#b45309;
+  --new:#15803d; --mod:#b45309; --code:#f8f9fb;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code,pre,.mono{font-family:"Cascadia Code",Consolas,"SF Mono",Menlo,monospace}
+
+
+header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;
+  align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.4px}
+.brand span{color:var(--accent)}
+.top nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.top nav a{padding:4px 10px;border-radius:6px;color:var(--dim);font-size:13.5px}
+.top nav a:hover{background:var(--bg3);color:var(--fg);text-decoration:none}
+
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 100px}
+.hero{padding:52px 0 30px;border-bottom:1px solid var(--line)}
+.hero h1{margin:0 0 12px;font-size:38px;letter-spacing:-.5px;line-height:1.25}
+.hero p.lead{color:var(--dim);font-size:17px;max-width:74ch;margin:0 0 22px}
+.pill{display:inline-block;padding:3px 11px;border-radius:99px;font-size:12.5px;
+  background:var(--bg3);color:var(--dim);border:1px solid var(--line);margin-right:7px}
+
+h2.sec{font-size:24px;margin:52px 0 14px;padding-bottom:8px;
+  border-bottom:1px solid var(--line)}
+h3.sub{font-size:17.5px;margin:30px 0 10px;color:var(--fg)}
+p{margin:11px 0}
+ul,ol{margin:11px 0;padding-left:22px}
+li{margin:6px 0}
+.dim{color:var(--dim)}
+
+
+.chapter{margin:56px 0 0;padding-top:30px;border-top:1px solid var(--line)}
+.chapter:first-of-type{border-top:0}
+.chead{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap;margin-bottom:4px}
+.cnum{font-size:13px;font-weight:700;color:var(--bg);background:var(--accent);
+  padding:3px 9px;border-radius:6px;letter-spacing:.5px}
+.chead h2{margin:0;font-size:28px;letter-spacing:-.3px}
+.csub{color:var(--dim);font-size:15px}
+.goal{margin:18px 0 26px;padding:15px 19px;background:var(--bg2);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+.goal b{color:var(--accent)}
+
+
+.theory{margin:18px 0 30px}
+.theory p{margin:12px 0;line-height:1.8}
+.theory ul,.theory ol{margin:12px 0;padding-left:24px}
+.theory li{margin:7px 0}
+h4.mini{margin:26px 0 10px;font-size:16px;font-weight:700;color:var(--accent);
+  display:flex;align-items:center;gap:9px}
+h4.mini::before{content:"";width:3px;height:15px;border-radius:2px;
+  background:var(--accent);flex:0 0 auto}
+.theory code,.guide code,p code,li code,td code{background:var(--bg3);
+  padding:1px 6px;border-radius:4px;font-size:.92em;color:#0a3069}
+.theory strong,.guide strong,.goal strong{font-weight:700;color:#0b1220}
+
+
+.steps{margin:16px 0 28px;display:flex;flex-direction:column;gap:14px}
+.step{background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:14px 18px 15px}
+.step h5{margin:0 0 9px;font-size:14.8px;font-weight:700;color:var(--fg);
+  display:flex;align-items:baseline;gap:8px}
+.step h5::before{content:"▸";color:var(--accent);font-size:13px}
+.step ul{margin:0;padding-left:20px}
+.step li{margin:7px 0;font-size:15px;line-height:1.75;color:#3d4757}
+.step li code{background:#fff;border:1px solid var(--line);color:#0a3069}
+
+
+.step .exnote{margin:14px 0 6px;font-size:13.5px;line-height:1.7;color:var(--dim)}
+.step pre.ascii{background:#fff;margin:6px 0 2px;font-size:12.6px}
+
+
+.step .codewrap{margin:12px 0 2px;border:1px solid var(--line);border-radius:9px;
+  overflow:hidden;background:var(--bg3)}
+.step .codewrap>summary{cursor:pointer;list-style:none;padding:10px 14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:14px;
+  font-weight:600;color:var(--fg);user-select:none}
+.step .codewrap>summary::-webkit-details-marker{display:none}
+.step .codewrap>summary .sumcap{flex:1 1 auto}
+.step .codewrap>summary .sumcap::before{content:"▸  ";color:var(--accent);
+  font-size:12px;display:inline-block;transition:transform .15s}
+.step .codewrap[open]>summary .sumcap::before{transform:rotate(90deg)}
+.step .codewrap>summary .sumhint{flex:0 0 auto;font-size:12px;font-weight:500;
+  color:var(--dim)}
+.step .codewrap[open]>summary{border-bottom:1px solid var(--line);
+  background:var(--bg2)}
+.step .codewrap[open]>summary .sumhint{display:none}
+.step .codewrap .codeblock{margin:0;border:0;border-radius:0;box-shadow:none}
+
+.step .codewrap>summary .copybtn{flex:0 0 auto;font:inherit;font-size:12px;
+  font-weight:500;line-height:1.4;padding:3px 10px;border-radius:6px;
+  border:1px solid var(--line);background:var(--bg);color:var(--dim);
+  cursor:pointer;transition:color .12s,border-color .12s,background .12s}
+.step .codewrap>summary .copybtn:hover{color:var(--accent);border-color:var(--accent);
+  background:#fff}
+.step .codewrap>summary .copybtn.done{color:var(--new);border-color:rgba(21,128,61,.45);
+  background:rgba(21,128,61,.06)}
+.step .codewrap>summary .copybtn.bad{color:#b91c1c;border-color:rgba(185,28,28,.45);
+  background:rgba(185,28,28,.06)}
+
+.step .codewrap>summary .sumfile{flex:0 0 auto;max-width:46%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,Consolas,
+  monospace;font-size:11.5px;font-weight:500;color:var(--dim);background:var(--bg);
+  border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.step .codewrap>summary .sumcap{min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:660px){.step .codewrap>summary .sumhint{display:none}}
+
+.theory .foldwrap{margin:14px 0 4px;border:1px solid var(--line);border-radius:9px;
+  overflow:hidden;background:var(--bg3)}
+.theory .foldwrap>summary{cursor:pointer;list-style:none;padding:9px 14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:14px;
+  font-weight:600;color:var(--fg);user-select:none}
+.theory .foldwrap>summary::-webkit-details-marker{display:none}
+.theory .foldwrap>summary .sumcap{flex:1 1 auto;min-width:0}
+.theory .foldwrap>summary .sumcap::before{content:"▸  ";color:var(--accent);
+  font-size:12px;display:inline-block;transition:transform .15s}
+.theory .foldwrap[open]>summary .sumcap::before{transform:rotate(90deg)}
+.theory .foldwrap>summary .foldhint{flex:0 0 auto;font-size:12px;font-weight:500;
+  color:var(--dim)}
+.theory .foldwrap[open]>summary{border-bottom:1px solid var(--line);
+  background:var(--bg2)}
+.theory .foldwrap[open]>summary .foldhint{display:none}
+.theory .foldwrap>pre.ascii{margin:0;border:0;border-radius:0;background:#fff;
+  color:var(--fg);font-size:12.6px;line-height:1.62;white-space:pre-wrap;
+  word-break:break-word;overflow-x:auto;tab-size:4;-moz-tab-size:4}
+@media (max-width:660px){.theory .foldwrap>summary .foldhint{display:none}}
+
+
+.files{display:flex;flex-direction:column;gap:6px;margin:14px 0 24px}
+.frow{display:flex;align-items:baseline;gap:11px;font-size:14px;padding:7px 13px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:7px}
+.tag{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;
+  flex:0 0 auto;letter-spacing:.3px}
+.tag.new{background:rgba(21,128,61,.10);color:var(--new);
+  border:1px solid rgba(21,128,61,.30)}
+.tag.mod{background:rgba(180,83,9,.10);color:var(--mod);
+  border:1px solid rgba(180,83,9,.30)}
+
+.codeov{margin:14px 0 0;padding:12px 15px;background:var(--bg2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;font-size:14.5px;line-height:1.8}
+.frow .mono{flex:0 0 auto;font-weight:600}
+.frow .fdesc{color:var(--dim);font-size:13px;line-height:1.6}
+
+
+.codeblock{margin:18px 0 26px;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;background:var(--code);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.fname{padding:9px 15px;background:var(--bg3);border-bottom:1px solid var(--line);
+  font-size:13px;color:var(--fg);display:flex;justify-content:space-between;
+  align-items:center;gap:12px}
+.fname .rng{color:var(--dim);font-size:12px;flex:0 0 auto}
+
+.step .codewrap>summary .loc{flex:1 1 100%;min-width:0;margin:2px 0 0;
+  font-size:12.5px;font-weight:500;line-height:1.7;color:var(--dim);
+  overflow-wrap:anywhere;user-select:text}
+.step .codewrap>summary .loc b{color:var(--fg);font-weight:600}
+.step .codewrap>summary .loc code{background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:0 4px;font-size:12px;color:var(--fg);cursor:pointer}
+.step .codewrap>summary .loc code:hover{border-color:var(--accent);background:#fff}
+.step .codewrap>summary .loc .locok{color:var(--new);font-weight:600;
+  margin-left:4px;user-select:none}
+.cap{padding:11px 15px;background:var(--bg2);border-bottom:1px solid var(--line);
+  font-size:14.5px;font-weight:600}
+.codenote{padding:11px 15px;background:var(--bg2);border-top:1px solid var(--line);
+  font-size:14px;color:var(--dim);line-height:1.7}
+.codenote b{color:var(--fg)}
+.codeblock .hl{overflow-x:auto;margin:0}
+.codeblock table.hl{border-spacing:0;width:100%;margin:0}
+.codeblock td{padding:0;vertical-align:top}
+.codeblock td.linenos{width:1%;white-space:nowrap;padding:0 0 0 12px;
+  border-right:1px solid var(--line);background:var(--bg3)}
+.codeblock td.linenos pre{margin:0;padding:13px 9px 13px 0;color:#9aa4b5;
+  font-size:12.5px;line-height:1.62;text-align:right}
+.codeblock td.code pre{margin:0;padding:13px 16px;font-size:13.3px;line-height:1.62;
+  color:var(--fg)}
+.codeblock .hll{background:rgba(37,99,235,.08);display:block;
+  box-shadow:inset 3px 0 0 var(--accent)}
+
+
+.codeblock .hll.hlw{background:rgba(180,83,9,.10);
+  box-shadow:inset 3px 0 0 var(--mod)}
+.hleg{margin:14px 0 0;padding:11px 14px;background:var(--bg2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 7px 7px 0;font-size:13.5px;line-height:1.85;color:var(--fg)}
+.sw{display:inline-block;width:22px;height:11px;border-radius:2px;
+  vertical-align:-1px;margin:0 5px 0 12px}
+.hleg .sw:first-child{margin-left:0}
+.sw-b{background:rgba(37,99,235,.14);box-shadow:inset 4px 0 0 var(--accent)}
+.sw-y{background:rgba(180,83,9,.16);box-shadow:inset 4px 0 0 var(--mod)}
+
+
+.codeblock tr.ctxhead td,.codeblock tr.ctxtail td{background:#eef1f6}
+.codeblock tr.ctxhead td{border-bottom:1px solid var(--line)}
+.codeblock tr.ctxtail td{border-top:1px solid var(--line)}
+.codeblock td.ctxl{width:1%;white-space:nowrap;padding:0 0 0 12px;
+  border-right:1px solid var(--line);color:#9aa4b5}
+.codeblock td.ctxl pre{margin:0;padding:5px 9px 5px 0;text-align:right;
+  color:#9aa4b5;font-size:12.5px;line-height:1.62}
+.codeblock td.ctxcode pre{margin:0;padding:5px 16px;color:#7a8494;
+  font-size:12.5px;line-height:1.62;white-space:pre-wrap;
+  overflow-wrap:anywhere}
+
+
+.codeblock .c,.codeblock .c1,.codeblock .cm,.codeblock .cs{color:#5c6678;font-style:italic}
+.codeblock .k,.codeblock .kc,.codeblock .kd,.codeblock .kn{color:#cf222e}
+.codeblock .ow,.codeblock .o{color:#0550ae}
+.codeblock .p{color:#57606a}
+.codeblock .s,.codeblock .s1,.codeblock .s2,.codeblock .sa,.codeblock .sb,
+.codeblock .sd,.codeblock .se,.codeblock .si,.codeblock .sr{color:#0a3069}
+.codeblock .mi,.codeblock .mf,.codeblock .mh,.codeblock .mo{color:#0550ae}
+.codeblock .nb,.codeblock .bp{color:#0550ae}
+.codeblock .nf,.codeblock .nd,.codeblock .fm{color:#6b3fc4}
+.codeblock .nc,.codeblock .nn,.codeblock .vm{color:#953800}
+.codeblock .ne{color:#cf222e}
+pre.ascii{background:var(--bg2);border:1px solid var(--line);border-radius:8px;
+  padding:14px 17px;font-size:13px;line-height:1.6;color:var(--warn);overflow-x:auto}
+
+
+.run{margin:16px 0 24px;display:flex;flex-direction:column;gap:11px}
+.runrow{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.runlabel{padding:7px 13px;background:var(--bg3);font-size:13px;color:var(--dim);
+  border-bottom:1px solid var(--line)}
+.runrow pre{margin:0;padding:11px 14px;background:var(--code);overflow-x:auto;
+  font-size:13.2px;line-height:1.65}
+
+
+.verify{margin:16px 0 8px;padding:0;list-style:none}
+.verify li{position:relative;padding:9px 0 9px 32px;border-bottom:1px dashed var(--line);
+  font-size:15px;margin:0}
+.verify li:last-child{border-bottom:0}
+.verify li::before{content:"☐";position:absolute;left:6px;top:8px;
+  color:var(--accent);font-size:16px}
+
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px;margin:20px 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px}
+.card h4{margin:0 0 7px;font-size:16px}
+.card p{margin:0;color:var(--dim);font-size:14px}
+.card .step{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px}
+
+
+.tree{background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:16px 19px;font-size:13.5px;line-height:1.85;overflow-x:auto;color:var(--fg);
+  white-space:pre}
+.tree.toc{white-space:normal}
+.toc-title{margin-bottom:10px}
+.toc-row{display:block}
+.tree .c{color:#5c6678}
+.tree .f-new{color:var(--new)}
+.tree .f{color:var(--fg)}
+
+
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.plain{width:100%;min-width:420px;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+table.plain th,table.plain td{padding:9px 13px;border-bottom:1px solid var(--line);
+  text-align:left;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}
+table.plain th{color:var(--dim);font-weight:600;font-size:13.5px}
+@media (max-width:520px){table.plain{font-size:13.5px}
+  table.plain th,table.plain td{padding:8px 10px}}
+.warnbox{margin:18px 0;padding:14px 18px;background:rgba(180,83,9,.06);
+  border:1px solid rgba(180,83,9,.22);border-radius:9px;font-size:14.6px}
+.warnbox b{color:var(--warn)}
+.okbox{margin:18px 0;padding:14px 18px;background:rgba(21,128,61,.06);
+  border:1px solid rgba(21,128,61,.22);border-radius:9px;font-size:14.6px}
+.okbox b{color:var(--new)}
+footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--line);
+  color:var(--dim);font-size:13.5px}
+</style>
+<style>.series-bridge{margin:24px 0;padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--bg2);font-size:14px}.series-bridge p{margin:6px 0}.series-bridge a{font-weight:600}.series-language{font-size:13.5px;white-space:nowrap;padding:4px 8px;border-left:1px solid var(--line)}[id]{scroll-margin-top:var(--series-offset,110px)}.top nav a[aria-current="page"]{color:var(--fg);background:var(--bg3)}@media(max-width:600px){.wrap li code,.wrap p code{white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .sumfile{white-space:normal;overflow-wrap:anywhere;min-width:0;max-width:100%}.step .codewrap>summary .sumcap{white-space:normal;min-width:0}.frow{flex-wrap:wrap}.frow .fdesc{flex:1 1 200px;min-width:0}.frow .mono{overflow-wrap:anywhere;min-width:0}.frow code{white-space:normal;overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}</style>
+</head>
+<body>
+<header class="top"><div class="top-in"><div class="brand">mini<span> agent-1</span> · Build a coding agent</div><nav aria-label="Series"><a href="#series-start" aria-current="page">mini agent-1</a><a href="advanced-guide.html">mini agent-2</a></nav><a class="series-language" data-target="guide.zh-CN.html" href="guide.zh-CN.html" lang="zh-CN">中文</a></div></header>
+<div class="wrap">
+<div class="hero"><p class="goal">The tutorial is in English by default, and you can switch to Chinese through the language link at the top. CLI prompts are in English; model responses follow the user language. Source excerpts match the current version without comments. </p>
+<h1 id="series-start">mini agent-1</h1>
+<p class="lead">This tutorial draws on the source code of pi and Codex.</p>
+<div class="tree toc" style="font-size:13px">
+<div class="toc-title"><b>Directory</b></div>
+<div class="toc-row">Chapter 1 · <a href="#ch1">Agent Loop</a>　<span class="c">Run the loop</span></div><div class="toc-row">Chapter 2 · <a href="#ch2">Tools</a>　<span class="c">Give the agent a pair of hands</span></div><div class="toc-row">Chapter 3 · <a href="#ch3">change queue</a>　<span class="c">Don’t mess with writing files concurrently</span></div><div class="toc-row">Chapter 4 · <a href="#ch4">interruptions and turns</a>　<span class="c">How to intervene after running?</span></div><div class="toc-row">Chapter 5 · <a href="#ch5">Session persistence</a>　<span class="c">Even if you turn it off, you can still continue chatting.</span></div><div class="toc-row">Chapter 6 · <a href="#ch6">Context compaction</a>　<span class="c">What to do if the history is too long</span></div><div class="toc-row">Chapter 7 · <a href="#ch7">System prompts and skills</a>　<span class="c">Let it know where it is</span></div>
+</div>
+</div>
+<div class="series-bridge"><b>mini agent-1 · Chapters 1–7</b><p>This implementation covers the loop, tools, concurrency, interruption, sessions, compaction, and skills. mini agent-2 continues with request retries, execution recovery, streaming, and authorization.</p><a href="advanced-guide.html#ch8">Continue to mini agent-2 · Chapter 8 →</a></div>
+<div class="chapter" id="ch1">
+<div class="chead"><span class="cnum">Chapter 1</span><h2>Agent Loop</h2><span class="csub">Run the model–tool loop</span></div>
+<div class="goal"><b>Goal</b> Write a loop that requests a model response, executes requested tools, appends their results, and repeats until no tool calls remain.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>A single question-and-answer model has no action capabilities - it tells you what to do, but it can't touch your files. </li>
+<li>Once the model says "I want to call the tool", three new questions arise: Who executes it? How to send the results back? When will it stop? </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>Start with a useful simplification: <strong>a model request does not execute actions or retain your conversation for you</strong>. You provide input and receive output. The client maintains the history and supplies the tools.</p>
+<p>So "agent" is not the ability of the model, <strong>it is the loop you wrote</strong>. The only responsibility of the loop is to translate the "I want to do something" output by the model into real actions, and then translate the results of the actions back into text to feed it. The intelligence is all in the model, and your code is only responsible for transportation and accounting. </p>
+<h4 class="mini">What a tool call actually does</h4>
+<p>A tool call <strong>does not execute anything by itself</strong>. The model returns a <code>tool_calls</code> array with entries such as <code>{id: "call_01...", function: {name: "read", arguments: "{...}"}}</code>. The <code>arguments</code> field contains JSON encoded as a string. Your program decides whether and how to execute the request.</p>
+<p>Understanding this, the whole structure falls into place: <strong>The loop is the hands</strong>. The model is responsible for thinking, you are responsible for doing it, and you will tell it the results after it is done. </p>
+<h4 class="mini">The OpenAI-style conversation format</h4>
+<p>Before you write a loop, you must first know what a request looks like. The entire protocol actually has only one entry: send a POST to <code>{base_url}/chat/completions</code>. The request body is divided into three parts——</p>
+<pre class="ascii">POST {base_url}/chat/completions
+{
+  "model": "gpt-4o-mini",
+  "messages": [ ← entire conversation, a list
+    {"role": "system", "content": "You are a coding agent..."},
+    {"role": "user", "content": "Help me take a look at config.py"},
+    ...
+  ],
+  "tools": [ ...tool declaration... ] ← The "hands" that the model can use
+}</pre>
+<p><code>messages</code> is a <strong>list</strong>, with each entry having the shape <code>{"role": ..., "content": ...}</code>. There are four types of roles in total. Remember their division of labor and use them in every subsequent chapter:</p>
+<ul><li><code>system</code>: System prompt to define the identity and rules of the model. <strong>Only put it in the first one</strong> (Chapter 7). </li><li><code>user</code>: What the user said. </li><li><code>assistant</code>: What the model says; when it wants to call the tool, this message will <strong>have an additional <code>tool_calls</code> array</strong>. </li><li><code>tool</code>: The result of tool execution, <strong>single one</strong>, relies on <code>tool_call_id</code> to claim which call it belongs to. </li></ul>
+<p>The response is also a JSON. There is only one path that really matters: <strong><code>choices[0].message</code></strong> - This is the model's reply in this turn. In the next turn, you have to stuff it back into <code>messages</code> as it is:</p>
+<pre class="ascii">{
+  "choices": [
+    {
+      "message": { "role": "assistant", "content": null,
+                   "tool_calls": [ {"id": ..., "function": {"name": ..., "arguments": ...}} ] },
+      "finish_reason": "tool_calls" ← Another field on the same level
+    }
+  ]
+}</pre>
+<p>Note that <code>finish_reason</code> and <code>message</code> are <strong>sibling fields at the same level</strong>: one contains what the model says, and the other contains the description of "why it stopped." This distinction will come into use shortly. </p>
+<h4 class="mini">Where to look up protocol fields</h4>
+<p>The requests and responses drawn above are not made up by me, they are OpenAI's <strong>Chat Completions</strong> interface - the entire interface has only this entry: send a POST to <code>{base_url}/chat/completions</code> and return a JSON. To check the exact meaning of any field, look no further than these pages:</p>
+<ul><li><strong>Definition of each field in the request body</strong> (<code>model</code> / <code>messages</code> / <code>tools</code> / <code>max_tokens</code>...): <a href="https://platform.openai.com/docs/api-reference/chat/create" rel="noreferrer" target="_blank">api-reference/chat/create</a></li><li><strong>What does the response object</strong> look like (<code>choices</code> → <code>message</code> → <code>content</code> / <code>tool_calls</code>, and <code>finish_reason</code> at the same layer): <a href="https://platform.openai.com/docs/api-reference/chat/object" rel="noreferrer" target="_blank">api-reference/chat/object</a></li><li>How to coordinate the four roles (<code>system</code> / <code>user</code> / <code>assistant</code> / <code>tool</code>) and complete dialogue examples: <a href="https://platform.openai.com/docs/api-reference/chat" rel="noreferrer" target="_blank">api-reference/chat</a></li><li>Tool calling this set of conventions (<code>tools</code> declaration, <code>tool_calls</code> return, <code>tool_call_id</code> pairing): <a href="https://platform.openai.com/docs/guides/function-calling" rel="noreferrer" target="_blank">guides/function-calling</a></li></ul>
+<p>Compared with the document, you will find that only four fields are used in the request body - <code>model</code>, <code>max_tokens</code>, <code>messages</code>, <code>tools</code>; in the response, only <code>choices[0].message</code> is read (the text is in <code>content</code>, the tool call is in <code>tool_calls</code>), and the other fields are ignored. <strong>The protocol is very large, and the agent needs only a small piece</strong> - streaming, multi-modal, sampling parameters, logprobs, etc., just pretend they don’t exist for now. </p>
+<h4 class="mini">Message pairing requirements</h4>
+<p>OpenAI style (chat/completions) has mandatory requirements for history structure. This constraint is the source of all the trouble in the following chapters and must be remembered from the beginning:</p>
+<pre class="ascii">user "Help me take a look at config.py"
+assistant {content: ..., tool_calls: [{id: "call_A", function: {name: read, ...}}]} ← Intent only
+tool {tool_call_id: "call_A", content: "..."} ← Must match
+assistant "This file defines a CONFIG dictionary..." ← Call it a day</pre>
+<p><strong>Each <code>tool_call</code> must have a message with the same <code>tool_call_id</code> and the same <code>role</code> as <code>tool</code></strong>, there can be no less or more. This rule will also be used later: in Chapter 4, the pairs must be supplemented when interrupted, and in Chapter 6, the cut points cannot break up the pairs during compaction, all because of it. </p>
+<p>Also note the usage of role: the tool result is a <strong>separate <code>role="tool"</code> message</strong>, the content is plain text (mostly stringified JSON), not <code>assistant</code>. This leads to a very hidden pit in Chapter 6. </p>
+<h4 class="mini">Why the loop checks tool_calls instead of finish_reason</h4>
+<p>The response contains sibling fields <code>finish_reason</code> and <code>message</code>. Typically, <code>finish_reason</code> is <code>"tool_calls"</code> when the model requests tools and <code>"stop"</code> when it finishes speaking. That makes it tempting to use this metadata as the loop condition.</p>
+<p>The reason is that the <strong>nature of these two fields is completely different</strong>:</p>
+<ul><li><code>finish_reason</code> is <strong>metadata of the service provider</strong>: it only describes "how the generation stopped" and is not part of the conversation itself. The values ​​​​of different manufacturers and different compatible endpoints are not completely consistent, and there are differences in actual measurements. </li><li>And <code>message.tool_calls</code> is <strong>a fact written into history by yourself</strong>: whether the model has given a tool call or not, just check whether the array is there and whether it is empty. It will always be reliable. </li></ul>
+<p>So the criterion in this chapter is "whether there is a non-empty <code>tool_calls</code> in the assistant message" instead of looking at <code>finish_reason</code>. <strong>Use facts, not metadata</strong> - This is an engineering principle that can be extended to many places. </p>
+<h4 class="mini">Why growing history needs compaction</h4>
+<p>Note that <code>messages</code> in the request body is <strong>complete history</strong>, not this sentence. Because the model is stateless, you won’t know what you talked about before if you don’t send it. </p>
+<p>So there is an account to be settled: assuming that 1 message is generated in each turn, and N messages are sent in the Nth turn. The cumulative amount sent after N turns is 1+2+...+N ≈ <strong>N²/2</strong>. <strong>The cost increases quadratically as conversation length increases</strong>. </p>
+<p>This is the fundamental reason for the existence of compaction in Chapter 6 - it is not the icing on the cake, but if it is not compressed, the context window will be hit after chatting for a long time, and the API will directly report an error. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>The loop has only one termination condition</strong>: there is no <code>tool_calls</code> array in this turn of responses. Don't look at <code>finish_reason</code> - it is the metadata of the service provider, and the naming is not uniform; and "Whether there is <code>tool_calls</code> in the assistant message" is a fact constructed by you, and it is always reliable. </li>
+<li><strong>Models are stateless</strong>. It doesn't remember what it said in the previous turn, so it has to resend the <strong>complete history</strong> in each turn. This is the root cause of all agent cost structures and why Chapter 6 compresses history. </li>
+<li><strong>Assistant messages should be saved as is</strong>. In addition to <code>content</code>, it also has an array of <code>tool_calls</code>. The next turn depends on the id inside to match the result of <code>role="tool"</code>. Saving only text will cause the next turn of requests to fail. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces the <code>mini_agent/</code> package: <code>config.py</code> collects settings, <code>llm.py</code> handles model requests, <code>agent.py</code> runs the loop, and <code>cli.py</code> provides the terminal interface. <strong>The result is an agent that can repeatedly call tools to complete a task.</strong> Later chapters extend the same structure.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">config.py</span><span class="fdesc">Central settings for the endpoint, API key, model, timeouts, and later features; environment variables override the defaults.</span></div><div class="frow"><span class="tag new">New</span><span class="mono">llm.py</span><span class="fdesc"><code>call_llm()</code> sends a request; the extraction helpers read the assistant message, text, and tool calls.</span></div><div class="frow"><span class="tag new">New</span><span class="mono">agent.py</span><span class="fdesc"><code>agent_loop()</code> requests a response, records it unchanged, executes tools, appends results, and repeats.</span></div><div class="frow"><span class="tag new">New</span><span class="mono">cli.py</span><span class="fdesc">The terminal REPL reads input, runs a turn, and prints the answer. <code>-v</code> enables tool output.</span></div><div class="frow"><span class="tag new">New</span><span class="mono">__init__.py</span><span class="fdesc">Declares <code>mini_agent</code> as an importable Python package.</span></div><div class="frow"><span class="tag new">New</span><span class="mono">__main__.py</span><span class="fdesc">The <code>from .cli import main</code> entry point enables <code>python -m mini_agent</code>.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Collect settings in config.py</h5>
+<ul><li>View the CONFIG of <code>mini_agent/config.py</code>, the model address, key and model name are read from environment variables. </li><li>The same configuration also contains session and compaction parameters used in subsequent chapters. Here we focus on the model request part first. </li></ul>
+{{SOURCE:config-10-53|Configuration and API key handling}}
+</div>
+<div class="step"><h5>Step 2: Implement llm.call_llm</h5>
+<ul><li><code>call_llm</code> of <code>mini_agent/llm.py</code> combines system and history into a request and sends it to <code>/chat/completions</code>. </li><li>The signal will be checked before and after the request returns; details of interrupts are placed in Chapter 4. </li></ul>
+{{INLINE:llm-9-21|Request module import and default prompt}}
+<p class="exnote">The system parameter of <code>call_llm</code> defaults to SYSTEM_PROMPT. The CLI will pass in the full system prompt assembled in Chapter 7; passing None will also use this default constant. </p>
+{{SOURCE:llm-24-75|call_llm: send a model request}}
+</div>
+<div class="step"><h5>Step 3: Extract message, text, and tool calls</h5>
+<ul><li>View <code>extract_message</code>, <code>extract_text</code>, <code>extract_tool_calls</code>; the message retains content and tool call information. </li><li>The JSON below is used to reference the response structure, not a code file from another stage. </li></ul>
+<p class="exnote">① The model just wants to talk: <code>tool_calls</code> does not exist at all, <code>content</code> is text</p>
+<pre class="ascii">{
+  "id": "a5d97c0de647ad8fd550f43b9cd98d52",
+  "object": "chat.completion",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello",
+        "reasoning_content": "...(Here lies the thinking process of the model, which is not read here)"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}</pre>
+<p class="exnote">② Model requests a tool: There is an extra <code>tool_calls</code> array, <code>content</code> is empty</p>
+<pre class="ascii">{
+  "id": "31627bb7940ad33d1b3bba47858e514b",
+  "object": "chat.completion",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_00_wo91vwl3s4wkiiidgyvi9fln",
+            "type": "function",
+            "function": {
+              "name": "bash",
+              "arguments": "{\"command\": \"ls -la\"}"
+            }
+          }
+        ],
+        "reasoning_content": "......(same as above, don't read)"
+      },
+      "finish_reason": "tool_calls"
+    }
+  ]
+}</pre>
+<p class="exnote">These two captured responses omit bookkeeping fields such as <code>usage</code> and <code>created</code>. Notice three details: the response is inside the <code>choices</code> array; <code>finish_reason</code> is a sibling of <code>message</code>; and <code>arguments</code> is a JSON string that needs <code>json.loads()</code>. A tool-calling response may have <code>content</code> set to <code>null</code> or <code>""</code>, so extract text with <code>content or ""</code>.</p>
+{{SOURCE:llm-78-93|Response extraction helpers}}
+</div>
+<div class="step"><h5>Step 4: Build the agent loop</h5>
+<ul><li>View <code>agent_loop</code> of <code>mini_agent/agent.py</code>: request model, save reply, execute tool, and refill results. </li><li>Tool implementation focuses on <code>mini_agent/tools.py</code>; here we take the shell tool as an example, and other tools are placed in Chapter 2. </li><li>The current loop also contains access points for interruption, persistence and compaction, which will be explained separately later. </li></ul>
+{{INLINE:agent-10-17|Import of the main loop module}}
+{{INLINE:agent-30-54|Default event callback}}
+{{INLINE:tools-36-53|Shell tool declaration}}
+<p class="exnote">The above are from agent.py and tools.py respectively; the tool implementation is no longer placed in agent.py. </p>
+{{SOURCE:tools-101-124|tool_bash: execute a shell command}}
+{{SOURCE:agent-195-245|agent_loop: model requests, tools, and history}}
+</div>
+<div class="step"><h5>Step 5: Add the CLI entry point</h5>
+<ul><li><code>build_parser</code> and <code>main</code> of <code>mini_agent/cli.py</code> are responsible for startup; interactive input is handled by <code>App.repl</code>. </li><li>The one-time mode in <code>main</code> directly calls the loop, and the interactive mode enters the App. </li></ul>
+{{INLINE:cli-10-17|CLI import}}
+<p class="exnote">These imports correspond to parameter parsing, background threads, sessions, prompts and loop calls, all from the current cli.py. </p>
+{{SOURCE:cli-270-312|CLI arguments and entry point}}
+</div>
+</div>
+</div><div class="chapter" id="ch2">
+<div class="chead"><span class="cnum">Chapter 2</span><h2>Tools</h2><span class="csub">Give the agent tools</span></div>
+<div class="goal"><b>Goal</b> Represent tools as a name-to-function table. Adding a tool should change its declaration and implementation without changing the loop.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>If you use if/elif in a loop to determine the tool name, each time you add a tool, the core code must be modified - the more the core code is modified, the easier it is to change. </li>
+<li>If the tool fails to execute (the file does not exist, the command times out) and an exception is thrown directly, the entire agent will collapse and the user will only see a stack. </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>In the loop in Chapter 1, the execution tool section probably looks like this:</p>
+<pre class="ascii">if name == "bash":     result = run_bash(inp)
+elif name == "read":   result = read_file(inp)
+elif name == "write":  result = write_file(inp)
+else:                   result = "unknown tool"</pre>
+<p>This can run. But it has two problems, both of which worsen as the project gets larger. </p>
+<h4 class="mini">Problem 1: The loop depends on every tool implementation</h4>
+<p>Every time you add a tool, you need to change the main loop. The main loop is the file that should be least touched in the entire project - it carries the functions of all subsequent chapters (interruption, compaction, persistence), and if you touch it once, you must re-verify all behaviors. </p>
+<p>The solution is the classic <strong>table driver</strong>: save "Name → Implementation" as a dictionary, and write only one line in the loop: <code>submit(name, input)</code>. Adding tools = changing the table, not the logic. Here, tool calls are separated from specific implementations. </p>
+<h4 class="mini">Problem 2: Tool failure will crash the agent</h4>
+<p>File does not exist, command timeout, path out of bounds - these are <strong>normal</strong> in the agent scenario, not abnormal situations. They can happen at any time because the caller is a fallible model. </p>
+<p>If an exception is thrown directly, the entire agent will die and the user will only see a stack. And if the error message is returned to the model as a tool result, it will understand it and change its approach - for example, if it sees "the file does not exist", it will list what is in the directory. </p>
+<p>Here is a counter-intuitive but important judgment: <strong>The responsibility for error handling is transferred</strong>. In traditional programs, errors are handled by the caller; in agents, <strong>errors are input to the model</strong>. So the tool always returns a string and never throws an exception. </p>
+<h4 class="mini">Tool declarations and implementations are separate</h4>
+<p>The <code>tools</code> parameter of the API requires each tool to provide: name, description, and a JSON Schema description parameter. This statement will be <strong>serialized into the request body</strong> as it is, and the model relies entirely on it to determine "how should I fill in the parameters". </p>
+<p>So there must be two tables in your code:</p>
+<ul><li><code>TOOLS</code> - a statement for the <strong>model</strong> to see. If it is written vaguely, the model will fill in the wrong parameters. </li><li><code>HANDLERS</code> - Implementation dictionary for <strong>yourself</strong>. </li></ul>
+<p><strong>Both tables must have the same name</strong>. If the name doesn't match, the model will see a tool that is "declared to exist, but must fail when called" - this kind of bug is very hidden, because the model will not say "this tool is not implemented", it will only try again and again. </p>
+<h4 class="mini">Why file tools use Python instead of the shell</h4>
+<p>A natural idea is: to read a file, execute <code>cat xxx</code>, and to write a file, execute <code>echo ... &gt; xxx</code>. <strong>Don't do this</strong> for three reasons:</p>
+<ul><li><strong>Quotation mark escaping</strong>: If there are spaces or Chinese brackets in the file name, the spelled out command will be broken; if there are quotation marks in the content, it will be even more disastrous. </li><li><strong>glob expansion</strong>: <code>cat *.py</code> will be expanded into a bunch of files by the shell, and the original intention of the model may be a file called <code>*.py</code>. </li><li><strong>Unable to locate error</strong>: The shell only gives you a return code, and you don’t know whether the file does not exist or the permissions are insufficient. If you directly enter <code>open()</code>, <code>OSError</code> will clearly tell you the reason. </li></ul>
+<p><strong>A path is a path and content is content</strong>. The shell is only reserved for scenarios where you really need to run commands (calling git, running tests). </p>
+<h4 class="mini">Keeping file paths inside the working directory</h4>
+<p>The model may give <code>../../etc/passwd</code>, or <code>C:\Windows\System32\...</code>. It's not malicious, it's just guessing. But your tool can't really read it. </p>
+<p>The solution is to <strong>resolve the path into an absolute path</strong> and then confirm that it falls within the subtree of the working directory. The key is to use <code>os.path.realpath</code> instead of <code>abspath</code> - the former will expand the symbolic link. Otherwise a soft link pointing to the outside can bypass the check. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>Two tables with different responsibilities</strong>: <code>TOOLS</code> is a statement (name, description, parameter schema) for <strong>model</strong>; <code>HANDLERS</code> is an implementation table for <strong>self</strong>. The two must have the same name, otherwise the model will see a tool that "exists but cannot be called". </li>
+<li><strong>Uniform signature <code>(input: dict) -&gt; str</code></strong> so that all tools fit into the same table. </li>
+<li><strong>Errors are also tool results</strong>. If the file cannot be read, <code>"Error: ..."</code> is returned to the model, allowing it to think of other solutions - this is much more useful than crashing the program. </li>
+<li><strong>Do not use shell for file operations</strong>. Just use open() to read the file, do not splice <code>cat xxx</code>: there is no quotation mark escaping problem, no glob expansion, the path is the path. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>tools.py</code> and routes execution through <code>submit()</code>. The agent can read, write, edit, and run commands; later tools can be added without adding branches to the loop.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">tools.py</span><span class="fdesc"><code>TOOLS</code> declares the interface for the model; <code>HANDLERS</code> and <code>submit()</code> implement dispatch. <code>safe_path()</code> constrains file-tool paths.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">agent.py</span><span class="fdesc">Tool execution calls <code>tools.submit(name, args)</code>, so the loop does not need a branch for every tool.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Declare TOOLS</h5>
+<ul><li>View <code>_function</code> and TOOLS of <code>mini_agent/tools.py</code>, and declare the four tools bash, read, write, and edit. </li><li>The tool name in the schema needs to correspond to the HANDLERS key. </li></ul>
+{{INLINE:tools-8-12|Import of tool module}}
+<p class="exnote"><code>parameters</code> of <code>read</code>: three keys, each responsible for one thing</p>
+<pre class="ascii">{
+  "type": "object", ← The whole is an object (= Python's dict)
+  "properties": { ← Field by field: key = parameter name, value = field's own schema
+    "path": {"type": "string", "description": "The path of the file to be read"},
+    "offset": {"type": "integer", "description": "Start reading from which line, counting from 1"},
+    "limit": {"type": "integer", "description": "Maximum number of lines to read"}
+  },
+  "required": ["path"] ← Only path is required; offset / limit are not included in this array = optional
+}</pre>
+<p class="exnote">The dependency of the file header comes from the current tools.py. The following schema example is used to explain the parameter structure. </p>
+{{SOURCE:tools-21-74|TOOLS: declarations sent to the model}}
+</div>
+<div class="step"><h5>Step 2: Validate paths with safe_path</h5>
+<ul><li><code>safe_path</code> uses realpath to resolve the path and then checks whether the target is in the working directory. </li><li>The file tool calls this function; the shell tool still executes commands according to the current user permissions. </li></ul>
+{{SOURCE:tools-81-90|safe_path: constrain file paths}}
+</div>
+<div class="step"><h5>Step 3: Give bash, read, and write a common signature</h5>
+<ul><li>View <code>tool_bash</code>, <code>tool_read</code>, and <code>tool_write</code>. The input parameters are all dictionaries and the return values are text. </li><li>write has been connected to the change queue. Chapter 3 will see how the queue coordinates file writing. </li></ul>
+<p class="exnote">Fill in this key in <code>config.py</code> in Chapter 1 (required for <code>read</code>)</p>
+<pre class="ascii">CONFIG = {
+    "max_read_lines": 2000,
+}</pre>
+<p class="exnote"><code>tool_read</code> reads the key in <code>CONFIG</code>. There is no <code>config.py</code> in the version of Chapter 1. If it is omitted, <code>KeyError</code> will be thrown directly when reading the file. 2000 means "read up to 2000 lines at a time". For longer files, the model uses <code>offset</code> / <code>limit</code> to paginate by itself. </p>
+{{SOURCE:tools-101-152|bash and read: a common signature}}
+{{SOURCE:tools-155-173|tool_write: replace the complete file}}
+</div>
+<div class="step"><h5>Step 4: Require a unique match for edit</h5>
+<ul><li><code>tool_edit</code> reads the content first, then checks the number of matches in old_string, and replaces only the unique match. </li><li>Reading, checking and writing back are all placed in mutate and called by mutation_queue.run. </li></ul>
+{{SOURCE:tools-176-217|tool_edit: replace a unique match}}
+</div>
+<div class="step"><h5>Step 5: Dispatch through HANDLERS and submit</h5>
+<ul><li><code>submit(name, inp)</code> finds the handler function from HANDLERS; tool errors are converted into text and returned. </li><li><code>_run_one(call, signal, emit)</code> of <code>mini_agent/agent.py</code> parses the arguments and then calls toolbox.submit. </li></ul>
+{{INLINE:agent-164-166|Loop through default configuration and tool table}}
+<p class="exnote">When tools are not passed in explicitly, toolbox.TOOLS is used, consistent with the declaration of the tool module. </p>
+{{SOURCE:tools-226-246|HANDLERS and submit: connect declarations to implementations}}
+{{SOURCE:agent-86-119|_run_one: parse arguments and dispatch a tool}}
+</div>
+</div>
+</div><div class="chapter" id="ch3">
+<div class="chead"><span class="cnum">Chapter 3</span><h2>Mutation Queue</h2><span class="csub">Coordinate concurrent writes</span></div>
+<div class="goal"><b>Goal</b> Execute tools concurrently while keeping each same-file read–modify–write operation inside one critical section.</div>
+<h3 class="sub">The problem</h3><ul>
+<li><strong>Concurrency comes first, then queues are needed</strong>. This order is very important. There will be no conflicts at all when executed serially. </li>
+<li>After concurrency, if two edits modify the same file, the updates will be lost:</li>
+</ul>
+<pre class="ascii">edit#1: Read "A" ────────────┐
+edit#2: Reads "A" ─────┼── Both reads A
+edit#1: Write "A1" ─────┘
+edit#2: writing "A2" ← overwrites edit#1</pre>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>The tools in the first two chapters are <strong>serial</strong> executed: if the model reads 5 files in one turn, it has to wait for 5 disk IOs. Changing to concurrency is natural—but once you change it, something goes wrong. </p>
+<h4 class="mini">Lost updates from concurrent writes</h4>
+<p>Suppose the model issues two edits in one turn, both modifying the same file:</p>
+<pre class="ascii">edit#1: Read "A" ──────────────┐
+edit#2: Read "A" ───────┼── Both read A
+edit#1: Write "A1" ──────┘
+edit#2: writing "A2" ← overwrites edit#1 and its changes disappear</pre>
+<p>This is not as simple as "whoever writes last wins" - <strong>edit#1's changes were completely lost</strong>, and no errors were reported. The model thought that both places had been changed, but in fact only one had been changed. This type of bug is called "lost update" and is the most classic problem in concurrent programming. </p>
+<p>Note that the root cause is <strong>"read-modify-write" and is not atomic</strong>. Edit is not a one-time write, but a three-step process of "reading in → calculating new content → writing back". The two edits are executed in an interleaved manner, and the second step is calculated based on expired content. </p>
+<h4 class="mini">Why concurrency needs coordinated writes</h4>
+<p>This order can easily be reversed. There is <strong>no conflict at all</strong> when executing serially, and this level of coordination is usually not needed when there is no concurrency; the same implementation here already includes a queue, and Chapter 3 focuses on its role. </p>
+<p>If you write the queue first and then concurrency, you will get a piece of code that "seems to be protecting something, but in fact there is no concurrency, so you can never detect the problem" - that is a very bad state: you don't know whether it is correct or not. </p>
+<h4 class="mini">One lock per path</h4>
+<p>The easiest way is to add a global lock and queue all disk writes. It can solve the problem, but <strong>it also erases the benefits of concurrency</strong> - changing <code>a.py</code> and changing <code>b.py</code> are obviously unrelated to each other, but they have to wait for each other. </p>
+<p>The correct approach is to <strong>bucket by file path</strong>:</p>
+<ul><li>The same file → shares a lock → serial. </li><li>Different files → each use its own lock → still parallel. </li></ul>
+<p>The implementation is a dictionary <code>{path: lock}</code>. When using it, take a handful of <code>setdefault</code>. The relevant implementation is concentrated in FileMutationQueue, but it has three places where it is easy to make mistakes. The following "Implementation Guide" explains each one. </p>
+<h4 class="mini">The lock registry has its own race condition</h4>
+<p>After bucketing by path, there is a more hidden problem: <strong>The action of "getting the lock" itself must be serialized</strong>. Look at the two lines of code <code>lock = locks.get(key)</code>, <code>if lock is None: locks[key] = Lock()</code> - there is a gap in the middle:</p>
+<pre class="ascii">Thread A: get(key) → None ──────┐
+Thread B: get(key) → None ──┼── Both found "no lock yet"
+Thread A: Create lock A and store it in ────────┘
+Thread B: Create lock B and save it ← overwrite lock A
+Result: Two threads each take a different lock to modify the same file</pre>
+<p>This is why there are two locks in the module: <code>_registry</code> to protect the dictionary itself, and <code>_locks[key]</code> to protect a certain file. <strong>The lock that protects the "lock" and the lock itself are two different things</strong> - without the former, the queue does not exist. </p>
+<p>These races can be intermittent and appear only under particular timing. Reason about the complete critical section instead of relying on one successful run.</p>
+<p>By the way: the corresponding <code>file-mutation-queue.ts</code> in the real project pi only has 61 lines. <strong>This kind of "few but critical" concurrency primitives are short in length but have a reason for each line</strong>, and are worth reading line by line. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>Bucket by path</strong>: The same file is serialized, but different files are still parallel. If only one global queue is used, the writing of unrelated files will also be strung together, which will slow down the process in vain. </li>
+<li><strong>Key normalization using realpath</strong>: Otherwise, <code>./a.txt</code>, <code>a.txt</code>, and symbolic links will be treated as three different keys, and a lock will be built for each, and the queue will be useless. </li>
+<li><strong>The step of acquiring the lock itself must also be serialized</strong>: Otherwise, two concurrent calls may find that "this lock has not been established yet" at the same time, so each builds one, which means there is no queue. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>mutation_queue.py</code>, wraps file mutations in <code>tools.py</code>, and executes tools with a thread pool in <code>agent.py</code>. Different files can be processed concurrently while same-file read–modify–write operations remain serialized.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">mutation_queue.py</span><span class="fdesc">A lock registry indexed by normalized absolute paths. <code>run(path, fn)</code> coordinates mutations of the same file.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">tools.py</span><span class="fdesc"><code>write</code> and <code>edit</code> pass the complete operation to <code>mutation_queue.run()</code>; the lock covers reading and checking as well as writing.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">agent.py</span><span class="fdesc"><code>ThreadPoolExecutor</code> runs tools concurrently and collects results in the original call order.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Normalize the path key</h5>
+<ul><li>View <code>FileMutationQueue._key_for</code> and use the normalized absolute path as the bucket key. </li></ul>
+{{SOURCE:mutation_queue-13-25|Normalize the lock key with realpath}}
+</div>
+<div class="step"><h5>Step 2: Protect the lock registry</h5>
+<ul><li><code>_registry</code> protection lock table: the same key shares the same lock. </li></ul>
+{{SOURCE:mutation_queue-29-36|Protect lock creation with a registry lock}}
+</div>
+<div class="step"><h5>Step 3: Run a mutation under its path lock</h5>
+<ul><li><code>run(path, fn)</code> calls fn after obtaining the lock of the target file; different keys use different locks. </li></ul>
+{{SOURCE:mutation_queue-27-40|run: execute under the path lock}}
+</div>
+<div class="step"><h5>Step 4: Lock the complete read–modify–write operation</h5>
+<ul><li>Both <code>tool_edit</code> and <code>tool_write</code> hand over the actual change action to mutation_queue.run. </li><li>The critical section covers the complete reading, checking, and writing back process. </li></ul>
+{{SOURCE:tools-176-217|edit: lock the complete read–check–write operation}}
+</div>
+<div class="step"><h5>Step 5: Execute tools in a thread pool</h5>
+<ul><li><code>execute_tool_calls(calls, *, signal, emit, executor=None)</code> receives the thread pool; multiple tasks are executed concurrently and the results are collected according to the submission list. </li><li><code>make_executor</code> creates a thread pool, which is created when the CLI is initialized and passed in when the loop is called. </li></ul>
+{{INLINE:agent-248-250|Create thread pool}}
+{{INLINE:agent-241-243|Execute and refill tool results}}
+{{INLINE:cli-74-83|CLI initialization thread pool and other status}}
+{{INLINE:cli-142-154|worker passes thread pool to loop}}
+{{INLINE:cli-262-263|Crap at the end of interaction}}
+<p class="exnote">These are the actual call points of the current implementation, and the parameter names remain consistent with the source files. </p>
+{{SOURCE:agent-69-83|execute_tool_calls: run concurrently, collect in order}}
+</div>
+</div>
+</div><div class="chapter" id="ch4">
+<div class="chead"><span class="cnum">Chapter 4</span><h2>Interruption and Steering</h2><span class="csub">Interrupt or redirect a running turn</span></div>
+<div class="goal"><b>Goal</b> Allow Ctrl+C to interrupt a turn and let new input steer the next model request while the worker is running.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>A turn can take tens of seconds. Keep the main thread available to read new instructions and signal interruption while the worker runs.</li>
+<li>The interruption itself has a hidden pitfall: if you interrupt the model just after saying "I want to call the tool", an assistant message with only <code>tool_calls</code> and no corresponding <code>role="tool"</code> message will be left in the history - <strong>The next request will be directly rejected by the API</strong>. </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>A turn can take tens of seconds while the model and tools run. If the main thread waits for the entire turn, it cannot read new instructions. Running the agent in a worker thread leaves the main thread available for interruption and steering.</p>
+<p>To solve this, you need two different things: <strong>Interrupt</strong> (I don’t want you to continue) and <strong>Turn</strong> (I want you to change direction). They look like the same thing, but the mechanics are completely different, hence the two classes. </p>
+<h4 class="mini">Why interruption uses an exception</h4>
+<p>Interruptions may occur <strong>deeply</strong>: in a utility function that is waiting for an HTTP response at <code>urlopen</code>, waiting for a child process to end, or recursively. </p>
+<p>If propagated by return value, the signature of each function must become <code>-&gt; tuple[result, aborted]</code>, and each layer must be checked and passed up. This will pollute the code beyond sight, and <strong>as long as one layer is missed, the interrupt will fail</strong>. </p>
+<p>Anomalies are designed to "jump out directly across many levels". Therefore, exceptions are used for interruption: caught at the outermost layer and thrown at the checkpoint. </p>
+<p>The cost is that exceptions will skip the normal cleanup logic, so the location of the checkpoint must be carefully selected - it cannot be left in an intermediate state such as "the memory has been changed and the disk has not been written yet." </p>
+<h4 class="mini">Why Signal uses threading.Event</h4>
+<p>In Chapter 4, you must also put the agent in a background thread to run (the main thread can continue to read your input). So the interrupt flag becomes a <strong>mutable state shared across threads</strong>. </p>
+<p>A plain <code>self.flag = True</code> is dangerous here: Python has the GIL, and simple assignments generally won't read torn values, but <strong>there are no guarantees about memory visibility and instruction reordering</strong>. <code>threading.Event</code> has a lock inside, which is standard practice and also expresses the intention of "this is a synchronization point". </p>
+<h4 class="mini">Why steering uses a queue</h4>
+<p>You may type two or three sentences in a row while the agent is running. If stored in a single variable, the latter sentence will overwrite the previous sentence and the previous sentence will be lost. So use queue. </p>
+<p>What’s more critical is the <strong>timing of taking away</strong>: the request has already been sent, and your sentence cannot be inserted into the current turn. You can only wait until the next turn begins to be inserted into history. So the queue must be cleared once <strong>at the beginning of each turn</strong> of the loop. </p>
+<p>The action of "clearing" must be <strong>atomic</strong>: if <code>len()</code> is judged first and then <code>pop</code> is passed one by one, and the main thread pushes another one in the middle, it may be missed or repeated. Therefore, we need to use the method of "taking it all at once and replacing it with an empty list" instead of popping in a loop. </p>
+<h4 class="mini">Interrupted calls still need tool results</h4>
+<p>Here you need to pay attention to the pairing of tool calls and results, which can be checked with tests. </p>
+<p>Consider this sequence: the model requests the <code>read</code> tool, the loop records the assistant message unchanged, and then you press <code>Ctrl+C</code> before a corresponding result is recorded.</p>
+<pre class="ascii">Historically it is now:
+  assistant {tool_calls: [{id: "call_A", ...}]} ← Saved
+  (There is no corresponding role="tool" message) ← The tool did not run because it was interrupted.
+
+Next request → API reject:
+  Assistant message with tool_calls must be followed
+  by tool messages for each tool_call_id</pre>
+<p>The naive way to write it is to write <code>break</code> directly at the interrupt check point. But then the <strong>orphan <code>tool_call</code></strong> will be left in history - the next request will be completely rejected by the API, and the error message will not point to the real reason at all (the user will think it is a problem with the model or network). </p>
+<p>Correct approach: When interrupted, <strong>add a <code>role="tool"</code> message to each unexecuted call</strong>. Use <code>tool_call_id</code> for the content and <code>"Error: aborted"</code> for the text, and then exit. In this way history is always legitimate. </p>
+<p>The important invariant is the same as in Chapter 1: <strong>every recorded tool call needs a matching result</strong>. Adding interruption must preserve that pairing even when normal execution stops.</p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>Use exceptions for interruptions, not return values</strong>. Interruptions may occur in deep places (while sending HTTP, waiting for tools), and returning layer by layer will contaminate all function signatures; if an exception is thrown, any checkpoint can jump out immediately. </li>
+<li><strong>Signal uses threading.Event</strong> because the agent runs in a child thread and requires thread-safe cross-thread visibility. </li>
+<li><strong>Direction queue</strong>. The request has been sent out, and your sentence cannot be inserted into the current turn. It can only be saved and inserted into history before the next turn begins. Use a queue instead of a single variable because you might type two sentences in a row. </li>
+<li><strong>Complete the <code>role="tool"</code> message after interruption</strong>. Here you need to ensure that tool calls and results are completely matched. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>control.py</code>, adds cancellation checks to the loop and model requests, and organizes the CLI around <code>App</code>. The agent runs in a worker thread while the main thread accepts steering input and Ctrl+C.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">control.py</span><span class="fdesc"><code>Aborted</code>, <code>Signal</code>, and <code>SteeringQueue</code> provide cooperative interruption and atomic draining of queued input.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">agent.py</span><span class="fdesc">Checks cancellation at execution boundaries and records a <code>role="tool"</code> result for every interrupted call already present in history.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">llm.py</span><span class="fdesc">Checks cancellation before sending a request and after receiving its response.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">cli.py</span><span class="fdesc"><code>App</code> manages state, input, and slash commands. The worker runs the agent while the main thread reads input or signals interruption.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Implement the control primitives</h5>
+<ul><li>View the Signal and SteeringQueue of <code>mini_agent/control.py</code> to store interruption status and supplementary input respectively. </li></ul>
+{{SOURCE:control-11-40|Cancellation: Aborted and Signal}}
+{{SOURCE:control-48-70|Queued input: SteeringQueue}}
+</div>
+<div class="step"><h5>Step 2: Add loop checkpoints</h5>
+<ul><li><code>agent_loop</code> checks the interrupt at the beginning, reads the steering queue and determines the upper limit of the number of turns. </li><li>Assistant has declared that when the tool is called, the interrupt branch must complete the result; <code>_run_one</code> will also check the signal. </li></ul>
+{{SOURCE:agent-168-186|Checks at the start of a loop iteration}}
+{{SOURCE:agent-215-236|Record matching tool results after interruption}}<div class="codenote">The tool calls that have been written to the history need to match the results before you can continue to request the model.</div>
+{{SOURCE:agent-104-119|Handle cancellation during tool execution}}
+</div>
+<div class="step"><h5>Step 3: Check the signal around model requests</h5>
+<ul><li><code>call_llm</code> Check signal before sending request and after receiving response. </li><li>urllib's blocking read cannot be canceled immediately, so an interruption does not mean that the executing request or tool has stopped. </li></ul>
+{{SOURCE:llm-31-38|Check the signal before the request}}
+{{SOURCE:llm-68-75|Check again after the response}}
+</div>
+<div class="step"><h5>Step 4: Run the CLI worker while reading input</h5>
+<ul><li><code>App.__init__</code> saves sessions, signals, queues, thread pools and renderers; <code>App.repl</code> reads ordinary input and commands. </li><li><code>App.run_turn</code> starts the background worker, and the main thread continues to read supplementary input. </li><li>The current implementation is shown directly below; related sessions and compaction wiring are explained in subsequent chapters. </li></ul>
+{{INLINE:cli-74-83|App initialization state}}
+<p class="exnote">Conversation, compaction, and prompt wiring explained in Chapters 5–7 are also included here. </p>
+{{SOURCE:cli-239-263|App.repl: interactive input}}
+{{SOURCE:cli-135-183|App.run_turn: worker execution and steering}}
+</div>
+</div>
+</div><div class="chapter" id="ch5">
+<div class="chead"><span class="cnum">Chapter 5</span><h2>Session Persistence</h2><span class="csub">Resume after closing the terminal</span></div>
+<div class="goal"><b>Goal</b> Save conversation history to disk so --continue can restore the latest session.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>As soon as you close the previous chapters, the dialogue disappears. The context is the most expensive thing of the agent. Throwing it away is equivalent to wasting all the tokens spent before. </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>The agents in the first four chapters are forgotten as soon as they pass. The context is precisely the <strong>most expensive thing</strong> of the agent - it contains the tokens you spent, the files the agent read, and the decisions it made. Throwing it away is a waste of all your money and time. </p>
+<h4 class="mini">Why sessions use JSONL</h4>
+<p>The most intuitive approach is to serialize the entire <code>messages</code> list into a <code>.json</code> file. But every time you append a message, you have to: read the entire file → parse → push → re-serialize → overwrite the entire file. </p>
+<p>After changing to <strong>JSONL</strong> (one JSON per line), the append is just <code>f.write(line + "\n")</code>. Three reasons, in order of importance:</p>
+<ul><li><strong>Append is cheap</strong>: one line per line, O(1) instead of O(file size). When talking about hundreds of turns, the difference is considerable. </li><li><strong>Crash-safe</strong>: Power off when writing line 7, the first 6 lines are still fully parsable. If the entire JSON file is damaged, not a single byte can be read. </li><li><strong>Tolerant of local damage</strong>: If a single row is broken, just skip it without affecting other rows. Real world log files always have half a line in them. </li></ul>
+<p>This idea has a name called <strong>Event log</strong> (event log): only appending, not modifying, the current status is calculated from the replay log. The WAL of the database and the commit history of Git are all the same routine. </p>
+<h4 class="mini">Writing a temporary file before replacing history</h4>
+<p>Appending cannot express every history update. Chapter 6 replaces older messages with one summary, so the session needs a method that rewrites the complete history.</p>
+<p>If you directly open the original file and overwrite it, a crash in the middle of writing will directly destroy the entire session. So write <code>xxx.jsonl.tmp</code> first, and then <code>os.replace(tmp, path)</code> after writing. </p>
+<p><code>os.replace</code> is <strong>atomic</strong> on both Windows and POSIX: either you see the old file or you see the new file, there is no intermediate state. This is a standard way to ensure that data is not damaged in the event of a crash. </p>
+<h4 class="mini">Understanding append and persist</h4>
+<p>Persistence involves two distinct actions: <strong>adding a message to the in-memory history</strong> and <strong>writing its JSONL record to disk</strong>. The loop owns the first action; the session hook owns the second. Connecting the wrong method performs the in-memory append twice.</p>
+<p>First look at the <strong>calling timing</strong> of the hook. It is in the <code>_append</code> indirection layer in the loop, with four lines in total:</p>
+<pre class="ascii">def _append(messages, msg, on_append):
+    messages.append(msg) ← ① The loop itself has put the messages into memory
+    if on_append: on_append(msg) ← ② The hook is just a "notification": I have finished changing the memory</pre>
+<p>The key is ②: when the hook is called, the message is <strong>already in memory</strong>. So the only thing the hook should do is "write it to the disk" - this is exactly the semantics of <code>persist</code> (only writes to the disk, does not touch the memory). If it is connected to <code>append_message</code> (its semantics is "add an item": both memory + disk are moved), the same action will be done twice:</p>
+<pre class="ascii">Loop: messages.append(msg) ← Loop plus the first pass
+       → on_append(msg)
+       → session.append_message(msg)
+         → self.messages.append(msg) ← session added a second time (repeat!)
+           self._write_line(msg) ← Only one line is written to the disk</pre>
+<p>Follow one turn containing a user message, an assistant tool call, and a tool result. When the result has been recorded, the difference between the correct and incorrect hooks is visible below:</p>
+<pre class="ascii"> memory disk
+user 1 item 1 line (CLI uses session.append, the same as the starting point)
+assistant 2 items ← repeated 1 line
+tool 2 items ← duplicated 1 line
+               ───── ─────
+               5 items 3 lines ← From here on the two sides do not match up</pre>
+<p>Notice which side is wrong: the three records on disk are correct, but memory contains duplicates. The next model request sends the duplicated assistant call and tool result. A strict endpoint may reject their ordering, while a permissive endpoint receives polluted context. Using <code>persist</code> keeps three in-memory messages aligned with three disk records.</p>
+<p>Omitting <code>on_append</code> causes the opposite problem: memory contains the whole turn, but disk contains only the user message written by the CLI. Restoring with <code>--continue</code> then loses the assistant and tool messages. Both failures come from an unclear division of responsibilities.</p>
+<p>Keep in mind the division of labor among the three methods. If you choose the wrong step, you will fall into the trap above:</p>
+<ul><li><code>session.append(role, content)</code> - "I want to add a new one": <strong>Memory + disk both move</strong>. Used by the CLI when storing user input into the session. </li><li><code>session.append_message(msg)</code> - Same as above, except that the complete dict is collected (used when restoring history from disk). <strong>Cannot be used as a hook</strong>: This is stated in its docstring. </li><li><code>session.persist(msg)</code> - "This item is already in the memory, I am only responsible for writing to the disk": <strong>Only touch the disk</strong>. This is the only way to use hooks. </li></ul>
+<p>The root cause is: <strong>Both objects think they should change the memory</strong>. The solution is to write down the responsibilities into a contract - <strong>The loop is responsible for modifying the memory, and the session is only responsible for placing disks</strong>. No one will repeat the work of the other. What falls on the CLI is the line <code>on_append=self.session.persist</code>. </p>
+<p>This mistake can quietly corrupt history without an immediate error. The useful invariant is simple: after a completed turn, the in-memory messages and the JSONL records should describe the same history.</p>
+<h4 class="mini">Preserving Python list identity</h4>
+<p>There is a similar trap. <code>replace_messages</code> To replace the history as a whole, the intuitive way to write it is <code>self.messages = messages</code>. <strong>It's also wrong</strong>. </p>
+<p>Because both <code>agent_loop</code> and CLI hold the <strong>original list object</strong>. You let <code>self.messages</code> point to a new list, and the old list is still held by them - the subsequent <code>append</code> will be written into a <strong>list that no one has read</strong>, and the memory and disk will be permanently decoupled. </p>
+<p>The correct way to write it is <code>self.messages[:] = messages</code> - the slice assignment is <strong>modified in place</strong>, and all holders can see the new content. This difference is very common in Python and is worth remembering separately: <strong><code>=</code> changes the object, <code>[:]=</code> changes the content</strong>. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>Use JSONL (one message per line) instead of a JSON array</strong> for three reasons: ① It is cheaper to append, just append directly; ② It is crash-safe, and the first 6 lines can still be parsed when the power is off when writing the 7th line; ③ If a single line is broken, it will not affect the whole. </li>
+<li><strong>This is the idea of event log</strong>: only append, not modify, the current status is calculated from the replay log. </li>
+<li><strong>Two entrances with clear responsibilities</strong>: <code>append</code> is "add a message", <code>replace_messages</code> is "overall rewriting" (used for compaction in Chapter 6). </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>session.py</code> and connects it through <code>_append()</code> and <code>on_append</code>. Conversation history survives closing the terminal and can be resumed with <code>--continue</code>. A replacement method also supports later compaction.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">session.py</span><span class="fdesc">One JSONL file per session, with creation, loading, append, persistence, and replacement methods, plus helpers to list or locate sessions.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">agent.py</span><span class="fdesc"><code>_append()</code> owns in-memory history changes; <code>on_append</code> delegates persistence to the session.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">cli.py</span><span class="fdesc">Startup and the session commands share the session layer. User input is saved before the model request.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Define Session state</h5>
+<ul><li>View the id, messages, path of <code>Session</code>, and how <code>create</code> determines the session file. </li></ul>
+{{SOURCE:session-17-34|Session state}}
+</div>
+<div class="step"><h5>Step 2: Load JSONL history</h5>
+<ul><li><code>Session.load</code> reads JSONL line by line. The current basic implementation will skip and prompt if it encounters lines that cannot be parsed. </li><li>This only describes the existing implementation and does not treat line-by-line parsability as a guarantee of automatic repair or complete crash recovery. </li></ul>
+{{SOURCE:session-36-55|load: skip malformed JSONL records}}
+</div>
+<div class="step"><h5>Step 3: Separate memory changes from disk writes</h5>
+<ul><li><code>append</code> and <code>append_message</code> modify the memory and write to the disk at the same time; <code>persist</code> only writes to the disk. </li><li>When the loop has appended messages, on_append should use persist to avoid repeated appending. </li></ul>
+{{SOURCE:session-59-80|Three methods with different write responsibilities}}
+</div>
+<div class="step"><h5>Step 4: Replace history atomically and in place</h5>
+<ul><li><code>replace_messages</code> Use slice replacement to keep the list object unchanged, and then rewrite the history through a temporary file. </li></ul>
+{{SOURCE:session-93-106|Session.replace_messages: replace history}}<div class="codenote">Slice assignment retains the original list object to prevent the old list from being referenced elsewhere.</div>
+</div>
+<div class="step"><h5>Step 5: Connect sessions to the loop and CLI</h5>
+<ul><li><code>_append</code> of <code>mini_agent/agent.py</code> is responsible for notifying the persistence hook; <code>App.run_turn</code> is passed into session.persist. </li><li><code>App._open_session</code> handles recovery parameters, and /new, /list, /resume in <code>App.handle_command</code> manage sessions. </li></ul>
+{{SOURCE:agent-133-137|_append: update memory and invoke the persistence hook}}<div class="codenote">The loop has appended messages, and the persistence hook only writes to the disk to avoid repeated appending.</div>
+{{SOURCE:session-119-131|List sessions and locate the latest session}}
+{{SOURCE:cli-74-114|App: initialize or locate a session}}
+{{SOURCE:cli-135-158|App.run_turn: use session history}}
+{{SOURCE:cli-187-215|Session commands: /new, /list, /resume}}
+</div>
+</div>
+</div><div class="chapter" id="ch6">
+<div class="chead"><span class="cnum">Chapter 6</span><h2>Context Compaction</h2><span class="csub">Make room in long conversations</span></div>
+<div class="goal"><b>Goal</b> As estimated usage approaches the context limit, replace older history with a summary while retaining recent complete turns.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>Every turn, <strong>the entire history</strong> must be sent to the model, and the history only increases - sooner or later the context window will burst, and the API will directly report an error. Even if it doesn't explode, the longer it is, the more expensive and slower it is. </li>
+<li>Compaction itself has an easy pitfall: if the cut point falls in the middle of a turn, orphan <code>role="tool"</code> messages will be left in the second half, which will also cause the request to be rejected. </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>Chapter 1 settled the account: history can only increase but not decrease, and every turn must send out <strong>all history</strong>. The cost increases by N²/2, and sooner or later it hits the context window of the model, and the API directly reports an error. </p>
+<p>The idea of compaction is very straightforward: <strong>Give the oldest piece of history to the model, let it write a summary, and then replace the original text with the summary</strong>. The complexity is reduced from O(N) to O(1). </p>
+<h4 class="mini">Cut history only at a complete turn boundary</h4>
+<p>Compaction should retain the original words of recent turns (the details are important), and only compress the older ones. Where should the cutting point be? The intuition is to "cut before a certain message in the middle", but this will cause trouble:</p>
+<pre class="ascii">If you cut here ↓
+  assistant {tool_calls:[{id: "call_A"}]} ← was suppressed
+  tool {tool_call_id: "call_A", ...} ← Keep
+
+A message with role="tool" without assistant matching tool_calls appears in the history → API rejection</pre>
+<p>It’s that agreement restriction from Chapter 1 again. So the cut-off point must fall at the <strong>beginning of a turn</strong>. </p>
+<p>How do you define "turn"? One turn = a user question + all assistant tool calls it triggers + the corresponding <code>role="tool"</code> result + the closing assistant text. The criteria must be looked at carefully - the tool result in OpenAI is <strong>independent <code>role="tool"</code> message</strong>, not <code>user</code>:</p>
+<pre class="ascii">{"role": "user", "content": "Help me change the config"} ← The beginning of a new round ✓
+{"role": "assistant", "content": ..., "tool_calls": [{...}]}
+{"role": "tool", "tool_call_id": "call_A", ...} ← Independent tool role
+{"role": "assistant", "content": "Changed"}</pre>
+<p>Fortunately, the criterion is still very simple: <strong>The new question is <code>role == "user"</code> and <code>content</code> is a plain string</strong>. The tool result is <code>role="tool"</code>, which naturally will not be regarded as the beginning of a turn - so the criterion <code>role == "user" and isinstance(content, str)</code> is clean and reliable, and the trouble of "distinguishing by content type" no longer exists in the OpenAI protocol. </p>
+<p><strong>This <code>is_turn_start</code> is the basis of all compaction logic</strong> - no error will be reported if it is written incorrectly, it will only be cut in places that should not be cut, and then explode on the next request. </p>
+<h4 class="mini">Choosing how much recent history to keep</h4>
+<p>After the cut-off point is determined, there is one parameter left to decide: <strong>How much to keep</strong>. Keeping less will save you a lot, but also leave less of the original text in the context - this section explains how to choose this number. </p>
+<p>This tutorial keeps a fixed number of recent turns: <code>compaction_keep_recent_turns</code>, defaulting to three. <code>find_cut_index</code> collects turn-start positions, counts backward to the third-most-recent start, and cuts immediately before it.</p>
+<pre class="ascii">turn_starts = [0, 5, 11, 18, 24] # 5 “beginnings of turns” in history
+keep=3
+cut = turn_starts[len(turn_starts) - keep] = turn_starts[2] = 11
+
+  messages[:11] is used to write summary, messages[11:] is kept as it is.
+  Not enough rounds (len(turn_starts) &lt;= keep) → Return None: nothing to stress</pre>
+<p><strong>Why 3? </strong>There is no derivation, it is just a shot - just enough to contain "what I am doing". What is really worth talking about is <strong>how to choose this number</strong>. </p>
+<p>Compacting only enough to fit just below the context limit leaves too little room for the next response and tool output. The next turn can trigger compaction again, repeatedly summarizing summaries and losing detail.</p>
+<p>Ask how much useful work can happen before another compaction is needed. Keeping recent complete turns preserves a working area of original messages while creating room for new work.</p>
+<p>What unit should be used to measure this work area? All three units have real products in use, and the choices are different:</p>
+<ul><li><strong>By number of messages</strong> (retaining the most recent N messages): The simplest implementation, but the number of messages in a turn is floating - a Q&amp;A with the tool may be 2, or it may be 30, and the actual number of retained messages can vary dozens of times. </li><li><strong>By number of turns</strong> (retain the latest N turns): The retention amount fluctuates with the "size of the turn", but a turn is a unit that users can perceive. They can clearly understand it by reading the log and telling others ("the last three questions are still in the original text"). Take this route for the tutorial version. </li><li><strong>According to token budget</strong> (retain enough recent history of about M tokens): closest to the real constraints, the actual number of turns retained will automatically adapt - if the chat is long-winded, keep a few turns, and if the chat is compact, keep a few more turns; the cost is that tokens must be calculated, and the cut point may fall in the middle of the turn, so additional processing of "cut half turns" is required. </li></ul>
+<p>No matter which unit is used, three principles are common:</p>
+<ul><li><strong>Summarize older messages and preserve recent ones.</strong> Current work and fresh tool output need their original detail.</li><li><strong>The retained unit must be a complete turn</strong>: Retaining half a turn is equivalent to creating an unmatched <code>tool</code> message (the constraint in the previous section). </li><li><strong>The criterion is "whether the work area is enough", not "whether the number of tokens is low enough"</strong>: The criterion is - when the model continues to work, should it look back to you for original information. </li></ul>
+<p>The real implementations of both sides are below. Click to see the source code and extracted strings - their choices are more sophisticated than the tutorial version, but they are also more complicated. </p>
+<details class="foldwrap"><summary><span class="sumcap">pi: Backtrack from the end according to the token budget (20,000 tokens are left by default)</span><span class="foldhint">Click to expand the original text</span></summary><pre class="ascii">// 1) Default value: packages/coding-agent/src/core/settings-manager.ts:18-28
+const DEFAULT_COMPACTION_TOKEN_SETTINGS: Required&lt;CompactionModelOverride&gt; = {
+	reserveTokens: 16384,
+	keepRecentTokens: 20000,
+};
+
+export interface CompactionSettings {
+	enabled?: boolean; // default: true
+	reserveTokens?: number; // default: 16384
+	keepRecentTokens?: number; // default: 20000
+	modelOverrides?: Record&lt;string, CompactionModelOverride&gt;; // exact "provider/modelId" keys
+}
+
+// 2) When to compact: packages/agent/src/harness/compaction/compaction.ts:245-249
+/** Return whether context usage exceeds the configured compaction threshold. */
+export function shouldCompact(contextTokens: number, contextWindow: number, settings: CompactionSettings): boolean {
+	if (!settings.enabled) return false;
+	return contextTokens &gt; contextWindow - settings.reserveTokens;
+}
+
+// 3) What does the compaction point look like: compaction.ts:359-367 - it allows "cutting a round"
+/** Cut point selected for compaction. */
+export interface CutPointResult {
+	/** Index of the first entry retained after compaction. */
+	firstKeptEntryIndex: number;
+	/** Index of the turn-start entry when the cut splits a turn, otherwise -1. */
+	turnStartIndex: number;
+	/** Whether the selected cut point splits an in-progress turn. */
+	isSplitTurn: boolean;
+}
+
+// 4) How much to leave: compaction.ts:369-418
+// Accumulate "estimated tokens" from the end forward. Once keepRecentTokens is reached,
+// Select the first legal cut point "not less than the current subscript"
+/** Find the compaction cut point that keeps approximately the requested recent-token budget. */
+export function findCutPoint(
+	entries: Entry[],
+	startIndex: number,
+	endIndex: number,
+	keepRecentTokens: number,
+): CutPointResult {
+	const cutPoints = findValidCutPoints(entries, startIndex, endIndex);
+
+	if (cutPoints.length === 0) {
+		return { firstKeptEntryIndex: startIndex, turnStartIndex: -1, isSplitTurn: false };
+	}
+	let accumulatedTokens = 0;
+	let cutIndex = cutPoints[0];
+
+	for (let i = endIndex - 1; i &gt;= startIndex; i--) {
+		const entry = entries[i];
+		if (entry.type !== "message") continue;
+		const messageTokens = estimateTokens(entry.message as AgentMessage);
+		accumulatedTokens += messageTokens;
+		if (accumulatedTokens &gt;= keepRecentTokens) {
+			for (let c = 0; c &lt; cutPoints.length; c++) {
+				if (cutPoints[c] &gt;= i) {
+					cutIndex = cutPoints[c];
+					break;
+				}
+			}
+			break;
+		}
+	}
+	while (cutIndex &gt; startIndex) {
+		const prevEntry = entries[cutIndex - 1];
+		if (prevEntry.type === "compaction") {
+			break;
+		}
+		if (prevEntry.type === "message") {
+			break;
+		}
+		cutIndex--;
+	}
+	const cutEntry = entries[cutIndex];
+	const isUserMessage = cutEntry.type === "message" &amp;&amp; cutEntry.message.role === "user";
+	const turnStartIndex = isUserMessage ? -1 : findTurnStartIndex(entries, cutIndex, startIndex);
+
+	return {
+		firstKeptEntryIndex: cutIndex,
+		turnStartIndex,
+		isSplitTurn: !isUserMessage &amp;&amp; turnStartIndex !== -1,
+	};
+}</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">Codex (0.156.0): The entire paragraph is replaced with a handoff summary, without retaining the original text of recent turns</span><span class="foldhint">Click to expand the original text</span></summary><pre class="ascii">// Knobs that can be adjusted in the configuration (source code paths appearing in the same place: core/src/compact.rs, core/src/compact_token_budget.rs)
+model_context_window
+model_auto_compact_token_limit
+model_auto_compact_token_limit_scope
+//The value of the previous item: total | body_after_prefix
+model_post_turn_compact_threshold_percent
+compact_prompt
+
+// When the summary is injected into a new window, the fixed prefix (full text) is set at the front
+Another language model started to solve this problem and produced a summary of its thinking process. You also have access to the state of the tools that were used by that language model. Use this to build on the work that has already been done and avoid duplicating work. Here is the summary produced by the other language model, use the information in this summary to assist with your own analysis:
+
+// When the window is still exceeded after pressing, discard the oldest historical items one by one (the original sentence ends with "Error: " plus a space, followed by a specific error report)
+Context window exceeded while compacting; removing oldest history item. Error:
+
+// Reminder after multiple compressions, and placeholder when the summary cannot be obtained
+Heads up: Long threads and multiple compactions can cause the model to be less accurate. Start a new thread when possible to keep threads small and targeted.
+Post-turn compaction completed without an assistant summary
+(no summary available)
+
+// Tip before the window is completely exhausted (TokenBudgetConfigToml.auto_compact_fallback_prompt, full text)
+&lt;context_window_reminder&gt;
+The current context window is exhausted. Do not continue the task or give a final answer in this window. The next window will not automatically include this conversation. Make exactly one write or append call to `notes` now to save a concise checkpoint with the goal, decisions, progress, learnings, next steps, and the window ID and item ID of every relevant user request still being solved, as well as important actions/tool calls for future reference. Note that every non-assistant item, such as user, developer, tool response, has an item id `[id: ...]` that is immediately after its item content. After the notes result returns, call `functions.new_context`; do not use any tools other than `notes` and `functions.new_context`.
+&lt;/context_window_reminder&gt;
+
+// Matching default value
+"auto_compact_fallback_buffer_tokens": 16384
+
+// The first two paragraphs of the permanent prompt guidance_message (there is also a paragraph later about context reset, which is omitted here)
+For tasks that may span context windows, use `notes` to maintain a concise checkpoint of the goal, decisions, progress, learnings and next steps. Include the window ID and item ID for every relevant user request you are currently solving as well as important actions/tool calls. You can use `history` tool to look up details with the references later. Note that every non-assistant item, such as user, developer, tool response, has an item id `[id: ...]` that is immediately after its item content. Relative note paths belong to the current thread; absolute paths may read other threads' notes, but writes are limited to the current thread.
+
+It is a good idea to take incremental notes while you work so that you do not miss any important info. You can also use `get_context_remaining` tool to find the remaining token budget for better planning. Once the token budget is exhausted, you will lose access to the current window and continue in a fresh context window and you can only recover through `notes` and `history` tools. So be careful not to over-run the context window without any documentation.</pre></details>
+<p>The three approaches make different trade-offs. This tutorial retains a fixed number of complete turns. pi walks backward using a token budget and handles cuts within a turn. The cited Codex snapshot replaces history with a handoff summary and uses a fixed introduction; its fallback can discard older items if needed. These are historical source comparisons, not promises about current upstream behavior.</p>
+<p><strong>A reminder</strong>: Compaction is ultimately an operation of "losing information", but it needs to be done smartly. Constraints, paths, and conclusions that are used across many turns are best placed in the files (<code>AGENTS.md</code>, notes, tests) in the project in the turn they appear. Don't expect the summary to remember them for you. </p>
+<h4 class="mini">What the token estimate must include</h4>
+<p>To know exactly how many tokens there are, you have to calculate them literally using the tokenizer of the corresponding model. That means introducing dependencies, and changing the model requires changing the tokenizer. </p>
+<p>This tutorial uses <code>character_count / 3</code> as a rough estimate for mixed English and Chinese. Leave a reserve: an overestimate compacts early, while an underestimate can exceed the context window and fail the request.</p>
+<p>But the "number of characters" only counts <code>content</code>. <strong>A place that will be missed</strong>: <code>tool_calls</code> of assistant (function name + arguments of each call) and <code>tool_call_id</code> of <code>role="tool"</code> message, they also occupy tokens. Without them, the actual capacity of the history will be underestimated and the compaction timing will be delayed. </p>
+<p>So there must be a <code>compaction_reserve_tokens</code> (reservation) in the configuration, and the trigger condition is <code>estimated_tokens &gt; context_window - reserve_tokens</code>, not <code>&gt; context_window</code>. </p>
+<h4 class="mini">The prompt determines summary quality</h4>
+<p>If you just say "summarize this conversation", the model is likely to be written in human-readable prose, leaving out file paths, function names, and reasons for decisions - <strong>and those are exactly what will be used in subsequent conversations</strong>. </p>
+<p>So the summary instruction (<code>SUMMARY_INSTRUCTION</code>) must clearly require:</p>
+<ul><li><strong>Keep verbatim</strong> file paths, function names, variable names, and error messages. </li><li>Keep <strong>decisions made and reasons</strong> ("Choose A instead of B because..."). </li><li><strong>Write as a note to your future self</strong>, not prose. </li><li>Don’t be polite, don’t restate the problem, and don’t summarize “what users want.” </li></ul>
+<p>The summary instructions directly affect which details the agent retains after compaction. Refine them around exact paths, identifiers, decisions, and unfinished work.</p>
+<p>Compare the three prompt excerpts below: this tutorial, pi, and the cited Codex version. They make the intended audience and the information to preserve explicit, with different levels of formatting constraints.</p>
+<details class="foldwrap"><summary><span class="sumcap">Tutorial version: <code>SUMMARY_INSTRUCTION</code> (<code>mini_agent/compaction.py</code>)</span><span class="foldhint">Click to expand the original text</span></summary><pre class="ascii">You are compacting a coding session so it can continue in a fresh context.
+Write a dense handoff summary of the conversation below.
+
+You MUST preserve, verbatim where possible:
+- file paths that were read or modified
+- names of functions, classes, variables that were changed
+- decisions made and the reason for them
+- what is still unfinished
+
+Do NOT include chit-chat. Do NOT invent anything not present below.
+Write it as notes to your future self, not as prose for a human.</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">pi: <code>SUMMARIZATION_SYSTEM_PROMPT</code> + <code>SUMMARIZATION_PROMPT</code> (<code>packages/agent/src/harness/compaction/compaction.ts</code>)</span><span class="foldhint">Click to expand the original text</span></summary><pre class="ascii">── system ──
+You are a context summarization assistant. Your task is to read a conversation between a user and an AI assistant, then produce a structured summary following the exact format specified.
+
+Do NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the structured summary.
+
+── user ──
+The messages above are a conversation to summarize. Create a structured context checkpoint summary that another LLM will use to continue the work.
+
+Use this EXACT format:
+
+## Goal
+[What is the user trying to accomplish? Can be multiple items if the session covers different tasks.]
+
+## Constraints &amp; Preferences
+- [Any constraints, preferences, or requirements mentioned by user]
+- [Or "(none)" if none were mentioned]
+
+## Progress
+### Done
+- [x] [Completed tasks/changes]
+
+### In Progress
+- [ ] [Current work]
+
+### Blocked
+- [Issues preventing progress, if any]
+
+## Key Decisions
+- **[Decision]**: [Brief rationale]
+
+## Next Steps
+1. [Ordered list of what should happen next]
+
+## Critical Context
+- [Any data, examples, or references needed to continue]
+- [Or "(none)" if not applicable]
+
+Keep each section concise. Preserve exact file paths, function names, and error messages.</pre></details>
+<details class="foldwrap"><summary><span class="sumcap">Codex (0.156.0): Compaction prompt - a string extracted from the local <code>codex.exe</code>. The source code path that appears at the same place is <code>core/src/compact.rs</code></span><span class="foldhint">Click to expand the original text</span></summary><pre class="ascii">You are performing a CONTEXT CHECKPOINT COMPACTION. Create a handoff summary for another LLM that will resume the task.
+
+Include:
+- Current progress and key decisions made
+- Important context, constraints, or user preferences
+- What remains to be done (clear next steps)
+- Any critical data, examples, or references needed to continue
+
+Be concise, structured, and focused on helping the next LLM seamlessly continue the work.</pre></details>
+<p>Put the three copies together and the difference can be seen at a glance:</p>
+<ul><li><strong>The tutorial uses a checklist.</strong> It names the information that must survive verbatim but leaves the output format to the model. This keeps the instructions short, at the cost of a less predictable summary format.</li><li><strong>pi nailed the format</strong>: six paragraphs of fixed subtitles (Goal/Constraints &amp; Preferences/Progress/Key Decisions/Next Steps/Critical Context). Each paragraph is also given a line of square brackets written "What to fill in here". At the end, it is emphasized again that the precise path, function name, and error message should be retained. It also has two sentences: <code>Do NOT continue the conversation</code> - to prevent the model from treating the "summary request" as a new task and continue talking. </li><li><strong>The shortest Codex</strong>: The first sentence clearly explains what the task is (<code>CONTEXT CHECKPOINT COMPACTION</code>), and the second paragraph gives four <code>Include</code>. It writes "who is the reader" directly into the first sentence - this is a handoff summary for another LLM who will continue to work. </li><li><strong>Two things written by all three companies</strong>: Make it clear who the summary is for; when naming, you must keep the path, name, decision, and unfinished things. The only difference lies in how strict the format constraints are - the tutorial version relies on lists, pi relies on templates, and the Codex relies on one sentence plus four items. </li><li>pi also has one more <strong>incremental version</strong> (<code>UPDATE_SUMMARIZATION_PROMPT</code>): when compressing after the second time, new messages will be merged into the previous version of the summary, instead of compressing the old and new history all over again - its first rule is <code>PRESERVE all existing information from the previous summary</code>. If you want to save tokens, this trick is more effective than any wording optimization. </li></ul>
+<h4 class="mini">Two design details</h4>
+<p><strong>Use <code>role="user"</code> for the summary, not <code>assistant</code></strong>. For the model, "this is background information" is more like a premise explained by the user, rather than what it itself said. Using assistant will make it think that is its own conclusion. </p>
+<p><strong>The summary request is an independent one-time request</strong> and is not appended to the current conversation. Otherwise, your very act of compressing history is increasing history, which is ridiculous. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>The cut point must fall on the boundary of the "whole turn"</strong>. One turn = one user question + all assistant (including <code>tool_calls</code>) and <code>role="tool"</code> results it triggers. The criteria are: role == "user" and content is <strong>plain string</strong> (the tool result has its own <code>role="tool"</code>, so there will be no misjudgment; only user + string is considered the beginning of a new turn). </li>
+<li><strong>Inexact number of tokens, use estimation</strong>. The accuracy depends on each word segmenter. Here the number of characters/3 is enough - just leave enough margin to cover the error. It is safer to overestimate than to underestimate. </li>
+<li><strong>The summary is written by the model and its purpose should be clearly told</strong>. Just say "summary" and it might be written in human-readable prose, leaving out file paths and function names - which are really what the rest of the conversation will use. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>compaction.py</code> and connects it through <code>before_request</code>. Older history becomes a summary while recent complete turns remain unchanged. The CLI also exposes <code>/compact</code> for manual compaction.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">compaction.py</span><span class="fdesc"><code>estimate_tokens()</code> estimates size; <code>is_turn_start()</code> and <code>find_cut_index()</code> locate a safe boundary; <code>compact()</code> and <code>summarize()</code> build the new history.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">agent.py</span><span class="fdesc"><code>make_compaction_hook()</code> checks before requests and replaces history in place with <code>messages[:] = ...</code>.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">cli.py</span><span class="fdesc"><code>_make_before_request()</code> persists compacted history; <code>/compact</code> triggers compaction manually.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Estimate token usage</h5>
+<ul><li><code>estimate_tokens</code> summarizes the number of characters in messages, tool names, and parameters to make approximate token estimates. </li></ul>
+{{SOURCE:compaction-32-59|Estimate token usage}}
+</div>
+<div class="step"><h5>Step 2: Identify turn starts</h5>
+<ul><li><code>is_turn_start</code> uses the user role and string content to identify the new turn; tool results use the tool role. </li></ul>
+{{SOURCE:compaction-66-71|is_turn_start: identify complete turn boundaries}}
+</div>
+<div class="step"><h5>Step 3: Choose a safe cut point</h5>
+<ul><li><code>find_cut_index</code> Select the cutting point from the beginning of the turn and keep the most recent turns. </li></ul>
+{{SOURCE:compaction-74-91|find_cut_index: select the boundary}}
+</div>
+<div class="step"><h5>Step 4: Implement compact and summarize</h5>
+<ul><li><code>compact</code> Hand over the old history to summarize, keep the recent original text, and then return to the new list. </li><li><code>summarize</code> uses a separate request to generate the digest, and <code>_render</code> is responsible for organizing the input text. </li></ul>
+{{INLINE:compaction-138-157|_render for rendering summary input}}
+<p class="exnote">This paragraph comes directly from the _render function of the current compaction.py. </p>
+{{SOURCE:compaction-13-25|Summary instructions}}
+{{SOURCE:compaction-98-135|compact and summarize: the main flow}}
+</div>
+<div class="step"><h5>Step 5: Connect compaction with in-place replacement</h5>
+<ul><li><code>make_compaction_hook</code> replaces the interface wrapper that returns a new list with <code>agent_loop</code> by calling it before the request. </li><li><code>App._make_before_request</code> is written back to disk after the history length changes; the branch of /compact is in App.handle_command. </li></ul>
+{{SOURCE:agent-256-280|Replace history in place}}
+{{SOURCE:agent-188-193|Invoke compaction before model requests}}
+{{SOURCE:cli-116-131|Persist history after compaction}}
+{{SOURCE:cli-223-228|Manual compaction: /compact}}
+</div>
+</div>
+</div><div class="chapter" id="ch7">
+<div class="chead"><span class="cnum">Chapter 7</span><h2>System Prompts and Skills</h2><span class="csub">Provide context and project skills</span></div>
+<div class="goal"><b>Goal</b> Build the system prompt from general instructions, an environment snapshot, and optional Markdown skill files.</div>
+<h3 class="sub">The problem</h3><ul>
+<li>The prompts in the previous chapters are a hard-coded string. It doesn’t know what day it is today, which directory it is in, or what system it is running on. </li>
+<li>If I want to add some project-specific knowledge to the agent (such as the commit-message conventions specifications of this project), do I have to change the code every time? </li>
+</ul>
+<h3 class="sub">How it works</h3><div class="theory">
+<p>The system prompts in the first six chapters are a hard-coded string. It has two obvious shortcomings: <strong>I don’t know where I am</strong> (what day is it today, which directory is it in, what system is it in), and <strong>cannot be expanded</strong> (if I want to add project-specific knowledge, I have to change the code). </p>
+<p>This chapter turns it into three pieces spelled out. It seems simple, but all three design points have practical reasons. </p>
+<h4 class="mini">Three prompt layers and their order</h4>
+<p>The large model's attention to different locations in the context is <strong>not uniform</strong> - strongest at the beginning and end, weakest in the middle (this is the so-called "lost in the middle"). </p>
+<p>So the arrangement should be determined according to "Importance × Stability":</p>
+<ul><li><strong>Level 1 · Skeleton</strong>: The most critical constraints (how you work, how you speak) are placed <strong>at the front</strong>. For example, "Read before you write" can significantly reduce the situation where the model changes files based on imagination. </li><li><strong>Level 3 · Skills</strong>: Project-specific knowledge, placed <strong>at the end</strong> (closer to the end, and more focused). </li><li><strong>Tier 2 · Environment</strong> is sandwiched in the middle. It is pure fact and does not require special attention from the model, so it is most suitable to be placed in the middle. </li></ul>
+<p>The base prompt describes <strong>general working behavior</strong>, such as reading a file before editing it. Project-specific knowledge, such as commit-message conventions, belongs in a skill file.</p>
+<h4 class="mini">Local environment snapshots and server prompt caching</h4>
+<p>Two things need to be distinguished here: saving environment information locally is for less reading and calculation; server-side prompt caching is for reusing the calculated request prefix. The former needs to consider whether the information has expired, and the latter needs to consider whether the prefix is ​​stable. </p>
+<ul><li><strong>The local cache can be used, but it needs to be updated</strong>. Platform information is usually relatively stable; when the directory, date, permissions, etc. change, it needs to be collected again. You cannot simply store all the environment information once and use it all the time, nor do you need to recalculate all fields every time. </li><li><strong>Server-side cache reuses the same prefix</strong>. Changes in the earlier content will affect the longer prefix containing this change; the stable part before the change still has the opportunity to be reused. Actual hits also depend on the model, cache boundaries, length thresholds, retention times, and request routing, and are not guaranteed to be consistent throughout the day. </li></ul>
+<p><strong>Basic implementation here</strong>: <code>environment_block()</code> reads the directory, platform and date each time it is called, but the CLI only calls <code>build_system_prompt()</code> once when creating <code>App</code>, and reuses <code>self.system_prompt</code> for subsequent requests. Therefore it is actually a startup snapshot and will not be automatically updated after a long session spans days. This simple implementation is retained here. </p>
+<h4 class="mini">An optional extension: append environment updates</h4>
+<p>The open source code of Codex provides a reference method: <strong>Treat the environment as a stateful context, save snapshots, compare changes, and then generate update fragments</strong>. This not only gives the model newer facts, but also tries to retain what has been sent before. </p>
+<ul><li><strong>First create an environment snapshot</strong>: <code>EnvironmentsState</code> saves information such as the working directory, shell, date, time zone, network and file system permissions; when there is no old snapshot for the first time, compare it to the empty state to generate the required environment context. </li><li><strong>Subsequent comparison changes</strong>: <code>render_diff()</code> generates updates when the directory or other environment fields change compared to the last snapshot; when there are no relevant changes, no environment fragment is generated. Multi-environment scenarios also distinguish between new, changed, and unavailable environments. </li><li><strong>Environmental facts as independent context</strong>: Update renders into a <code>user</code> role fragment with a <code>&lt;environment_context&gt;</code> tag. The user role here is the way the client organizes context, and does not mean that this content is handwritten by the user. The date is also included in the snapshot comparison, and it cannot be generally said that "time does not enter the environmental context at all". </li></ul>
+<p>If you continue to expand the agent here, you can use a smaller version: <strong>The fixed skeleton and the skills used in the current session form stable instructions; add an environment description when starting a session; check the directory, date and other fields at the beginning of each turn, add updates after the history when there are changes, and clearly refer to the latest environment description</strong>. Don't repeatedly rewrite the reminder at the beginning of history just to update the time. After compressing history or restoring a session, also ensure that the model still sees a valid current environment. </p>
+<p>For example: keep yesterday's environment description and existing dialogue as they are, add "The current date has been updated to..." after crossing the day; add a new directory description after switching directories. For tasks that require precise time, the clock can be read on demand. This eliminates the need to put timestamps that change every second into fixed instructions. </p>
+<p>This organization <strong>helps preserve reusable prefixes, but does not guarantee cache hits</strong>. Whether there is a real hit or not depends on the <code>cached_tokens</code> returned by the API; the specific fields, billing, and cache settings are subject to the documents of the model used and the service provider. An interface compatible with Chat Completions is used here, and it cannot be assumed that all backends adopt OpenAI's caching rules. </p>
+<p>Reference: <a href="https://github.com/openai/codex/blob/a9b0815167c27ab13719dd12d13b63e02b70d221/codex-rs/core/src/context/world_state/environment.rs#L112" rel="noreferrer" target="_blank">Codex Environment snapshot and difference update source code</a> (checked for 2026-10-12); <a href="https://developers.openai.com/api/docs/guides/prompt-caching" rel="noreferrer" target="_blank">OpenAI prompt caching document</a>. This is an optional improvement direction. The following code still uses the basic writing method of assembling prompts at startup. </p>
+<h4 class="mini">Why skills are Markdown files</h4>
+<p>A skill is a Markdown file describing how to perform a class of tasks. For example, <code>git-commit.md</code> can contain the project’s commit-message conventions.</p>
+<p>Choosing files instead of code has three benefits:</p>
+<ul><li><strong>Changing it does not require touching the code</strong>, nor does it require revalidation. People who write documentation do not need to know how to write Python. </li><li><strong>You can prepare it separately by project</strong>: If you change a project, you need to change a set of <code>skills/</code> directories. </li><li><strong>The content is natural language</strong>, which happens to be the form that the model is best at understanding. You don't need to define any schema. </li></ul>
+<p>There is another important design principle here: <strong>Skills are optional enhancements, and no errors will be reported if they are missing</strong>. If the directory does not exist, an empty list will be returned. If a single file cannot be read, it will be skipped. The failure of an enhancement should not block the main process - this is the same idea as Chapter 2 "Tool failure should return error text instead of crashing". </p>
+<h4 class="mini">The recurring cost of system prompts</h4>
+<p>The system prompt is <strong>sent</strong> with every request. So the longer it is, the greater the fixed overhead is per turn. </p>
+<p>Keep skills concise. A rule such as “Write commit messages in Chinese; keep the first line under 50 characters” belongs in a skill file. A copy of the entire project documentation usually does not.</p>
+<p>By the way: This also explains why real coding agents put tool descriptions in tool declarations (on demand) and make project documents searchable (the agent reads them by themselves), instead of stuffing them all into system prompts. <strong>Each line of system prompts pays for the entire session</strong>. </p>
+</div>
+<h3 class="sub">Design trade-offs</h3><ul>
+<li><strong>It is divided into three layers, and the order is important</strong>: the skeleton (the most critical constraint) is placed first, and the volatile background information is placed at the back - the model's attention is strongest at the beginning and end. </li>
+<li><strong>Environment information is collected at the time of call</strong>: the date, directory and platform are collected when constructing the prompt; the current CLI is constructed once at startup, and this snapshot is reused for subsequent requests. </li>
+<li><strong>Skills are skills/*.md files</strong>. Changing a markdown does not require touching the code, and it can be prepared separately by project. If the directory does not exist, an empty list will be returned - skills are optional enhancements, and no error will be reported if they are missing. </li>
+</ul>
+<h3 class="sub">Files introduced or changed</h3><p class="codeov">This chapter introduces <code>prompt.py</code> and passes <code>build_system_prompt()</code> through the CLI. General instructions, an environment snapshot, and Markdown skills form the prompt. Project-specific knowledge can then be added as a skill file.</p><div class="files"><div class="frow"><span class="tag new">New</span><span class="mono">prompt.py</span><span class="fdesc"><code>BASE_PROMPT</code> supplies general instructions; the environment and skill helpers build context; <code>build_system_prompt()</code> joins the layers; <code>describe()</code> reports loaded skills.</span></div><div class="frow"><span class="tag mod">Changed</span><span class="mono">cli.py</span><span class="fdesc">Builds and reuses the prompt at startup. <code>/skills</code> lists the loaded skill files.</span></div></div>
+<h3 class="sub">Implementation</h3><div class="steps">
+<div class="step"><h5>Step 1: Define the base instructions</h5>
+<ul><li>Look at the BASE_PROMPT of <code>mini_agent/prompt.py</code>, the fixed behavior convention is placed here. </li></ul>
+{{SOURCE:prompt-16-29|Layer 1: general instructions}}
+</div>
+<div class="step"><h5>Step 2: Collect environment information</h5>
+<ul><li><code>environment_block</code> reads the current directory, platform and date to form environment information. </li></ul>
+{{SOURCE:prompt-32-39|Layer 2: environment information}}
+</div>
+<div class="step"><h5>Step 3: Load skills from disk</h5>
+<ul><li><code>load_skills</code> reads the Markdown file in the skills directory, and <code>skills_block</code> joins their contents. </li></ul>
+{{SOURCE:prompt-51-87|Layer 3: Markdown skills}}
+</div>
+<div class="step"><h5>Step 4: Assemble the prompt</h5>
+<ul><li><code>build_system_prompt</code> joins the layers in the order of skeleton, environment and skills. </li><li>The prompt requires the model to follow the language used by the user; the CLI always uses English. </li></ul>
+{{SOURCE:prompt-90-94|Assemble the three layers}}
+</div>
+<div class="step"><h5>Step 5: Pass it through the CLI</h5>
+<ul><li><code>App.__init__</code> loads the skill and constructs system_prompt, run_turn passes it to agent_loop. </li><li>The /skills branch in <code>App.handle_command</code> shows loaded skills. </li></ul>
+{{SOURCE:cli-74-83|Connect the prompt to the CLI}}
+{{SOURCE:cli-216-222|Inspect loaded skills with /skills}}
+</div>
+</div>
+</div>
+<footer><div class="series-bridge"><b>After Chapter 7</b><p>mini agent-2 starts with a failed model request and connects retries, recovery, and authorization. It uses mini_agent.advanced from the same package; the original interactive entry point remains available.</p><a href="advanced-guide.html#ch8">mini agent-2 · Chapter 8: Failures and retries →</a></div>
+ Start:<code>python -m mini_agent</code>　·
+ <a href="LICENSE">MIT license</a> · <a href="THIRD_PARTY_NOTICES.md">Reference statement</a>
+</footer>
+<script>
+
+(function () {
+  'use strict';
+
+  function codeText(details) {
+    var pre = details.querySelector('td.code pre');
+    if (!pre) {
+      var all = details.querySelectorAll('.codeblock pre');
+      for (var i = 0; i !== all.length; i++) {
+        if (!all[i].closest('.linenodiv')) { pre = all[i]; break; }
+      }
+    }
+    if (!pre) { return null; }
+
+    return pre.textContent.replace(/[\s\u00a0]+$/, '') + '\n';
+  }
+
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', 'readonly');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function flash(btn, ok) {
+    if (btn._flashTimer) { clearTimeout(btn._flashTimer); }
+    btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
+    btn.className = ok ? 'copybtn done' : 'copybtn bad';
+    btn._flashTimer = setTimeout(function () {
+      btn.textContent = 'Copy';
+      btn.className = 'copybtn';
+    }, 1300);
+  }
+
+
+  function copyFind(el) {
+    var text = el.textContent;
+    var mark = document.createElement('span');
+    mark.className = 'locok';
+    function done(ok) {
+      mark.textContent = ok ? 'Copied ✓' : 'Copy failed';
+      if (!mark.parentNode) { el.parentNode.appendChild(mark); }
+      setTimeout(function () {
+        if (mark.parentNode) { mark.parentNode.removeChild(mark); }
+      }, 1300);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { done(true); },
+        function () { done(legacyCopy(text)); }
+      );
+    } else {
+      done(legacyCopy(text));
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    if (!el || !el.closest) { return; }
+    var fc = el.closest('.loc code');
+    if (fc) { ev.preventDefault(); copyFind(fc); return; }
+    var btn = el.closest('.copybtn');
+    if (!btn) { return; }
+    ev.preventDefault();
+
+    var details = btn.closest('details');
+    var text = details ? codeText(details) : null;
+    if (text === null) { flash(btn, false); return; }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { flash(btn, true); },
+        function () { flash(btn, legacyCopy(text)); }
+      );
+    } else {
+      flash(btn, legacyCopy(text));
+    }
+  }, false);
+})();
+</script>
+</div>
+<script>(()=>{const offset=()=>document.documentElement.style.setProperty('--series-offset',Math.ceil(document.querySelector('.top').getBoundingClientRect().height)+24+'px');offset();addEventListener('resize',offset);const link=document.querySelector('.series-language');const target=link.dataset.target;const sync=()=>{const url=new URL(target,location.href);url.hash=location.hash;link.href=url.href};sync();addEventListener('hashchange',sync)})();</script>
+</body>
+</html>
