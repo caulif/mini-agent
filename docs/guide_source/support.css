@@ -1,6 +1,2 @@
-
-[id]{scroll-margin-top:var(--nav-offset,100px)}.wrap{min-width:0}.codeblock{max-width:100%;overflow:auto}.codeblock table{width:100%;border-spacing:0}.source{margin:0}.step .codewrap>summary .sumcap{white-space:normal;overflow:visible;flex:1 1 180px}.step .codewrap>summary .sumfile{max-width:100%;white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .loc{flex:1 1 100%}.step .codewrap .codenote{border-top:0;font-size:13px}.scope-note{margin:24px 0;padding:14px 18px;border-left:3px solid var(--accent);background:var(--bg2);font-size:14px;border-radius:0 8px 8px 0}.chapter-nav{display:flex;justify-content:space-between;gap:16px;margin-top:30px;padding-top:18px;border-top:1px solid var(--line);font-size:14px}.frow .mono{overflow-wrap:anywhere;min-width:0}.frow{flex-wrap:wrap}.frow .fdesc{flex:1 1 250px}.theory code,p code,li code{white-space:normal;overflow-wrap:anywhere}.step .codewrap>summary .sumfile a{color:inherit}.codeblock .hll{white-space:pre}
+.source{margin:0}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.language-switch{font-size:13.5px;white-space:nowrap;padding:4px 8px;border-left:1px solid var(--line)}.top nav a[aria-current="page"]{color:var(--fg);background:var(--bg3)}
-@media(max-width:600px){.top-in{gap:8px 18px}.top nav a{padding:4px 6px}.step{padding:12px}.codeblock td.code pre{font-size:12px}.full-files .step .codewrap{margin:0}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

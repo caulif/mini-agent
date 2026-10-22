@@ -18,13 +18,13 @@ OUTPUTS = LANGUAGES['OUTPUTS']
 UI = LANGUAGES['UI']
 
 
-def source_code(spec, *, full=False, language='zh-CN'):
+def source_code(spec, *, language='zh-CN'):
     ui = UI[language]
     path = ROOT / spec['path']
     text = path.read_text(encoding='utf-8')
     lines = text.splitlines()
     start, stop = 1, len(lines)
-    if not full:
+    if spec['symbol']:
         node = ast.parse(text)
         if spec['symbol'] == 'CONFIG.update':
             node = next(n for n in node.body if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)
@@ -47,17 +47,18 @@ def source_code(spec, *, full=False, language='zh-CN'):
     assert len(focused) <= 4
     rendered = highlight(code, PythonLexer(), HtmlFormatter(linenos='table', linenostart=start,
                          hl_lines=focused, cssclass='hl'))
-    kind = 'file' if full else 'snippet'
     label = spec['title']
-    return (f'<details class="codewrap" data-kind="{kind}"><summary>'
-            f'<span class="sumcap">{escape(label)}</span><span class="sumfile">{escape(spec["path"])}</span>'
+    location = f'第 {start}–{stop} 行' if language == 'zh-CN' else f'Lines {start}–{stop}'
+    hint = '点击展开关键代码' if language == 'zh-CN' else 'Expand code'
+    return (f'<details class="codewrap" data-kind="snippet"><summary>'
+            f'<span class="sumcap">{escape(label)}</span><span class="sumfile"><a href="{escape(spec["path"])}">{escape(spec["path"])}</a>:{start}–{stop}</span>'
+            f'<span class="sumhint">{hint}</span>'
             f'<button class="copybtn" type="button" aria-label="{ui["copy_label"]}">{ui["copy"]}</button>'
-            f'<span class="loc">{f"第{start}—{stop}行" if language == "zh-CN" else f"Lines {start}–{stop}"} · <a href="{escape(spec["path"])}">{ui["full_file"]}</a></span></summary>'
-            f'<figure class="source" data-kind="{kind}" data-source-file="{escape(spec["path"])}" data-start="{start}" data-end="{stop}">'
-            f'<div class="codeblock">{rendered}</div></figure>'
-            + (f'<div class="codenote">{spec["note"]}</div>' if spec.get('note') else '') + '</details>'), dict(
-                path=spec['path'], start=start, end=stop, kind=kind,
-                symbol=None if full else spec['symbol'], sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+            f'</summary><figure class="source" data-kind="snippet" data-source-file="{escape(spec["path"])}" data-start="{start}" data-end="{stop}">'
+            f'<div class="codeblock"><div class="fname">{escape(spec["path"])}<span class="rng">{location}</span></div>{rendered}</div></figure></details>'
+            + (f'<p class="exnote">{spec["note"]}</p>' if spec.get('note') else '')), dict(
+                path=spec['path'], start=start, end=stop, kind='snippet',
+                symbol=spec['symbol'], sha256=hashlib.sha256(path.read_bytes()).hexdigest())
 
 
 def render(language='zh-CN'):
@@ -66,20 +67,23 @@ def render(language='zh-CN'):
     chapter_label = lambda n: LANGUAGES['chapter_label'](n, language)
     source_map, body = [], []
     css = (SOURCE / 'reference.css').read_text(encoding='utf-8')
+    reference = (SOURCE / f'agent1.{language}.html').read_text(encoding='utf-8')
+    series_css = re.findall(r'<style>([\s\S]*?)</style>', reference)[1]
+    reader_note = re.search(r'<div class="hero">\s*(<p class="goal">[\s\S]*?</p>)', reference)[1]
     extras = (SOURCE / 'support.css').read_text(encoding='utf-8')
     script = (SOURCE / 'reader.js').read_text(encoding='utf-8')
-    body.append(f'<div class="hero"><h1>{ui["hero"]}</h1><p class="lead">{ui["lead"]}</p>'
+    body.append(f'<div class="hero">{reader_note}<h1 id="series-start">{ui["hero"]}</h1><p class="lead">{ui["lead"]}</p>'
                 f'<div class="tree toc" id="contents" style="font-size:13px"><div class="toc-title"><b>{ui["contents"]}</b></div>')
     for c in chapters:
         body.append(f'<div class="toc-row">{chapter_label(c["num"])} · <a href="#ch{c["num"]}">{escape(c["title"])}</a>　<span class="c">{escape(c["subtitle"])}</span></div>')
-    body.append(f'</div></div><div class="scope-note series-handoff">{ui["handoff"]}</div><div class="scope-note"><b>{ui["intro_title"]}</b>{ui["intro"]}</div>')
+    body.append(f'</div></div><div class="series-bridge series-handoff"><b>mini agent-2 · {"8—13章" if language == "zh-CN" else "Chapters 8–13"}</b>{ui["handoff"]}</div>')
     for c in chapters:
         body.append(f'<section class="chapter" id="ch{c["num"]}"><div class="chead"><span class="cnum">{chapter_label(c["num"])}</span>'
                     f'<h2>{escape(c["title"])}</h2><span class="csub">{escape(c["subtitle"])}</span></div>'
                     f'<div class="goal"><b>{ui["goal"]}</b>　{c["goal"]}</div><h3 class="sub">{ui["problems"]}</h3><ul>'
                     + ''.join(f'<li>{point}</li>' for point in c['problems']) + '</ul>'
                     + f'<h3 class="sub">{ui["theory"]}</h3><div class="theory">' + c['theory'] + '</div>'
-                    + f'<h3 class="sub">{ui["choices"]}</h3><ul>' + ''.join(f'<li>{x}</li>' for x in c['choices']) + '</ul>'
+                    + f'<h3 class="sub">{ui["choices"]}</h3><ul>' + ''.join(f'<li>{x}</li>' for x in [*c['choices'], c['boundary']]) + '</ul>'
                     + f'<h3 class="sub">{ui["files"]}</h3><div class="files">')
         for tag, path, description in c['files']:
             body.append(f'<div class="frow"><span class="tag {"new" if tag == "新增" else "mod"}">{ui["new"] if tag == "新增" else ui["mod"]}</span>'
@@ -92,32 +96,17 @@ def render(language='zh-CN'):
                 html, record = source_code(spec, language=language)
                 body.append(html); source_map.append(dict(chapter=c['num'], **record))
             body.append('</div>')
-        body.append(f'</div><h3 class="sub">{ui["run"]}</h3><p>{ui["offline"]}</p><div class="run">')
-        for label, command in c['run']:
-            body.append(f'<div class="runrow"><div class="runlabel">{escape(label)}</div><pre>{escape(command)}</pre></div>')
-        body.append(f'</div><h3 class="sub">{ui["checks"]}</h3><ul class="verify">' + ''.join(f'<li>{x}</li>' for x in c['checks'])
-                    + f'</ul><div class="warnbox"><b>{ui["boundary"]}</b>{c["boundary"]}</div>'
-                    + f'<h3 class="sub">{ui["full_sources"]}</h3><div class="steps full-files">')
-        for _, path, title in c['files']:
-            html, record = source_code(dict(path=path, title=title + ' · ' + ui['full_file']), full=True, language=language)
-            body.append('<div class="step">' + html + '</div>'); source_map.append(dict(chapter=c['num'], **record))
-        body.append('</div><div class="chapter-nav">')
-        if c['num'] > 8:
-            body.append(f'<a href="#ch{c["num"] - 1}">← {chapter_label(c["num"] - 1)}</a>')
-        else:
-            body.append(f'<a href="{escape(ui["basic_href"])}#ch7">{ui["basic_last"]}</a>')
-        body.append(f'<a href="#contents">{ui["contents"]}</a>')
-        if c['num'] < 13:
-            body.append(f'<a href="#ch{c["num"] + 1}">{chapter_label(c["num"] + 1)} →</a>')
         body.append('</div></section>')
-    body.append(f'<footer><a href="{escape(ui["basic_href"])}#ch7">{ui["basic_last"]}</a> · <a href="#contents">{ui["advanced_contents"]}</a></footer>')
+    footer = re.search(r'</div>([\s\S]*?)</footer>', reference[reference.index('<footer>'):])[1]
+    footer = footer.replace('python -m mini_agent', 'python -m mini_agent.advanced')
+    body.append(f'<footer><div class="series-bridge"><a href="{escape(ui["basic_href"])}#ch7">{ui["basic_last"]}</a> · <a href="#contents">{ui["advanced_contents"]}</a></div>{footer}</footer>')
     html = (f'<!DOCTYPE html><html lang="{language}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             + ''.join(f'<link rel="alternate" hreflang="{lang}" href="{file}">' for lang, file in OUTPUTS.items())
-            + f'<title>{ui["page_title"]}</title><style>' + css + '\n' + extras + '</style></head><body>'
+            + f'<title>{ui["page_title"]}</title><style>' + css + '\n' + series_css + '\n' + extras + '</style></head><body>'
             f'<header class="top"><div class="top-in"><div class="brand">mini<span> agent-2</span> · {ui["brand"]}</div>'
-            f'<nav><a href="{escape(ui["basic_href"])}">{ui["basics"]}</a><a href="#contents" aria-current="page">{ui["advanced"]}</a></nav>'
-            f'<a class="language-switch" data-target="{OUTPUTS[ui["other"]]}" href="{OUTPUTS[ui["other"]]}" lang="{ui["other"]}" hreflang="{ui["other"]}">{ui["switch"]}</a>'
-            '</div></header><main class="wrap">' + ''.join(body) + '</main><script>' + script + '</script></body></html>')
+            f'<nav aria-label="Series"><a href="{escape(ui["basic_href"])}">{ui["basics"]}</a><a href="#series-start" aria-current="page">{ui["advanced"]}</a></nav>'
+            f'<a class="series-language language-switch" data-target="{OUTPUTS[ui["other"]]}" href="{OUTPUTS[ui["other"]]}" lang="{ui["other"]}">{ui["switch"]}</a>'
+            '</div></header><div class="wrap">' + ''.join(body) + '</div><script>' + script + '</script></body></html>')
     return html, source_map
 
 

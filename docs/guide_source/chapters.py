@@ -43,8 +43,6 @@ CHAPTERS = [
    step('接回原调用方并核对次数', ['call_llm 保留原请求体，只替换发送段。同一个Request可以重发，主循环与已写入的工具结果不重建。','回归把503、工具意图、429、最终回答依次返回，分别统计HTTP发送、工具执行和历史条数。'],
     code('mini_agent/llm.py','call_llm','请求层的接线','请求体构造与执行工具处于不同函数。',('data = post_json',)),
     code('mini_agent/retry_selfcheck.py','TransportChecks.test_full_agent_does_not_replay_tool','四次请求，一次工具','这是经过真实主循环的离线控制流检查。'))],
- run=[('离线回归，不请求真实模型','python -B -m mini_agent.retry_selfcheck')],
- checks=['首发加重试不超过预算；401、未知结果和坏响应不自动重发。','工具前后请求都遇到可重试错误时，工具仍只执行一次。','停止后的退避不再发送，迟到响应不交给循环。'],
  boundary='当前策略不保证服务端只处理或计费一次，也不提供工具崩溃恢复；全局费用预算与跨请求总时限未实现。'),
 
  dict(num=9, title='执行记录与恢复', subtitle='把“没有结果”拆成三种状态',
@@ -70,8 +68,6 @@ tool：把call_A的结果交回模型</pre>
  step('在工具前后连接started与result',['Runtime._tool 先保存started，再调用submit，拿到字符串结果后保存result。try只包工具本身，日志与宿主事件错误留在外层。'],code('mini_agent/runtime.py','Runtime._tool','实际执行与记录顺序','started与result之间的退出都保留为未知。',("self.journal.append('started'","self.journal.append('result'"))),
  step('按ID恢复尚未配齐的调用',['restore 以pending、starts和results追踪同一ID。已存result可以补消息；未知先抛RecoveryRequired，发生在模型请求之前。'],code('mini_agent/journal.py','Journal.restore','恢复配对，不执行旧工具','恢复器没有调用handler的路径。',('if unknown and not acknowledge_unknown:',))),
  step('在真实退出点检查文件与历史',['子进程先写文件，在result之前直接退出。新运行器恢复时应阻止Provider调用；另一个退出点放在result之后，验证复用结果。'],code('mini_agent/advanced_selfcheck.py','AdvancedChecks.test_real_crash_unknown_blocks_then_explicit_ack','写后退出的恢复回归','不能只依据异常文字判断，现场文件与调用次数也属于判据。'))],
- run=[('离线恢复与锁检查','python -B -m mini_agent.advanced_selfcheck'),('已有进阶日志的只读阶段查看','python -B -m mini_agent.advanced --resume "<日志路径>" --status')],
- checks=['写后result前退出时，文件改变但续跑被阻止，旧工具不重复。','result后退出时，恢复复用已存结果补tool消息。','坏行保留原文件；第二个进程不能同时写同一日志。'],
  boundary='不提供任意外部动作的事务、恰好一次执行、自动现场核对或旧Session迁移；锁的适用范围为本机文件系统。'),
 
  dict(num=10, title='流式响应', subtitle='文字可以先显示，工具必须等完整',
@@ -94,8 +90,6 @@ arguments片段2："report.txt","content":"hello"}
  step('按调用索引拼接字段',['consume把同一index的id、name和arguments分别累积。参数保持字符串，最终才解析为对象；中间没有submit调用。'],code('mini_agent/streaming.py','collect_stream.consume','消费一个SSE事件','文本增量只送往on_delta，不是执行入口。')),
  step('在完整结束之后返回响应',['collect_stream按空行分帧，限制总字节数和单行长度；终止后检查finish、DONE与调用索引，再形成完整message。'],code('mini_agent/streaming.py','collect_stream','事件边界与提交门槛','缺少DONE或finish，均不返回半截响应。',('if not done or finish is None',))),
  step('复用原循环的执行与落盘顺序',['Runtime._request只把text_delta送往显示。完整结果返回后仍检查Signal与响应结构，后续保存和执行继续沿原循环进行。'],code('mini_agent/runtime.py','Runtime._request','预览与正式响应的接线','不同请求来源经过同一响应检查。'))],
- run=[('离线与本机SSE检查','python -B -m mini_agent.advanced_selfcheck')],
- checks=['中文文本与分段参数可以聚合为完整消息。','缺失终止、截断或中断时不产生assistant历史与工具副作用。','本机HTTP实际接收stream=true并返回SSE。'],
  boundary='未验证所有服务商兼容性；不支持流断点续传、多模态或跨线程即时关闭阻塞读取。'),
 
  dict(num=11, title='工具权限与停止', subtitle='模型选择动作，宿主决定能否执行',
@@ -120,8 +114,6 @@ report.txt不应产生</pre>
  step('在handler之前检查授权',['submit先检查停止和注册表，再判断写权限。即使声明没有暴露write，这里仍会拦截直接传入的调用。'],code('mini_agent/permissions.py','WorkspaceTools.submit','调度入口的权限判断','拒绝应发生在实际文件操作之前。',('if write and not self.allow_write:',))),
  step('解析路径并保护执行证据',['path不相信字符串前缀。resolve后的越界路径被拒绝，模型也不能通过工具修改自己的日志与Git元数据。'],code('mini_agent/permissions.py','WorkspaceTools.path','路径边界','这不防御任意恶意并发进程的链接替换或可信Python代码。')),
  step('在实际修改前检查停止',['_write先检查路径和content，再检查Signal，最后创建父目录和写入。检查点不是文件事务，不能撤回已开始的写入。'],code('mini_agent/permissions.py','WorkspaceTools._write','业务字段与修改检查点','授权、参数和停止分别承担不同判断。'))],
- run=[('离线越权、junction与停止检查','python -B -m mini_agent.advanced_selfcheck')],
- checks=['伪造write和bash调用仍被拒绝，被拒调用没有文件产物。','解析后越界、保留目录和Windows特殊路径被拒绝。','停止已触发时不创建文件。'],
  boundary='没有OS沙箱、shell授权执行、Windows进程树终止或文件回滚；可信handler仍拥有宿主Python权限。'),
 
  dict(num=12, title='测试与效果评估', subtitle='把程序走通与模型做对分开',
@@ -142,8 +134,6 @@ report.txt不应产生</pre>
  step('隔离尝试并检查实际产物',['evaluate为每次尝试创建临时目录和Journal。运行结束后直接检查文件、错误与最终内容，临时数据不影响下一轮。'],code('mini_agent/evaluation.py','evaluate','一次任务到一组尝试','passed条件与Provider宣称成功的文字分开。',('passed = not error_kind',))),
  step('把判定保存为可检查的报告',['main接受重复次数与输出路径。只要存在失败，进程返回非零；JSON文件存在不表示任务全部通过。'],code('mini_agent/evaluation.py','main','报告与退出状态','保存输出时使用新的路径，避免覆盖已有实验记录。')),
  step('检查评估器能否识别运行错误',['用例让Runtime.run确定地失败，确认报告给出失败而不是丢掉样本或误计通过，同时不泄露原始异常内容。'],code('mini_agent/advanced_selfcheck.py','AdvancedChecks.test_evaluation_records_runtime_failures','评估错误的回归','测量装置也需要自己的失败判据。'))],
- run=[('三任务各三次，不请求真实模型','python -B -m mini_agent.evaluation --repeats 3')],
- checks=['read、write_edit、deny_write分别使用独立起点与实际结果判据。','real_model=false，未采集的token与费用为null。','运行错误不计通过，存在失败时命令非零退出。'],
  boundary='没有真实模型基线、成本采集、统计显著性结论或通用coding benchmark；小任务集只覆盖指定运行路径。'),
 
  dict(num=13, title='会话组合与扩展接口', subtitle='把生命周期接回同一条循环',
@@ -165,7 +155,5 @@ Runtime B → Journal B / root B / Signal B / registry B</pre>
  step('把恢复与循环放在同一生命周期',['run先持锁恢复，再记录新输入并进入循环。正常完成的日志在没有新任务时直接返回，不再次请求模型。'],code('mini_agent/runtime.py','Runtime.run','恢复、追加与主循环的组装','锁覆盖整个恢复与运行，不只覆盖打开日志的一瞬间。')),
  step('注册可信工具时明确契约',['名称、Schema与handler必须对应。mutating默认True，表示按修改类动作处理；这由宿主标注，不是自动分析函数副作用。'],code('mini_agent/permissions.py','WorkspaceTools.register','可信扩展入口','可信Python仍拥有宿主权限，注册表不是沙箱。')),
  step('从命令行进入同一组装路径',['--status读取已有阶段后返回，不请求模型。实际运行创建Runtime并解释结束状态；root来自恢复日志，写权限来自本次启动。'],code('mini_agent/advanced.py','main','进阶入口与退出码','正常完成0、未完成2、运行错误1、中断130；退出0不代替产物验收。'))],
- run=[('入口帮助与组合回归，不请求真实模型','python -B -m mini_agent.advanced --help\npython -B -m mini_agent.advanced_selfcheck')],
- checks=['两个实例不串目录、注册表与Signal。','Provider重复工具ID在第二次执行之前被拒绝。','已完成日志直接恢复不再请求，未完成与错误保留不同退出状态。'],
  boundary='没有会话分支、多agent协作、远程插件或完整Provider配置管理；扩展代码的可信性不由注册接口保证。'),
 ]

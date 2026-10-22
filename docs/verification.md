@@ -21,3 +21,12 @@ A headless Microsoft Edge check opened all four guides from file URLs at widths 
 Independent review confirmed the request-only retry boundary, default read-only workspace tools, reserved journal/Git paths, serial journaled execution, complete-response gate, and unchanged original CLI logic. Python AST comparison found no executable changes in eight existing modules beyond removing docstrings.
 
 These checks establish local control flow and documented source consistency. They do not measure real model quality or external-provider behavior.
+
+
+## 2026-10-22 — Match mini agent-1 structure and style
+
+mini agent-2 now uses the same five chapter sections as mini agent-1: problem, principle, design trade-offs, files introduced or changed, and implementation. Removed the separate running, verification, and complete-source sections in both languages. Implementation limits remain in design trade-offs. The extra reading instructions, warning panels, chapter navigation, and duplicated full files are gone.
+
+The two guides share the language note, series chrome, code-summary layout, source filename/line display, and footer conventions. mini agent-1 and all runtime files remain unchanged.
+
+`python -B scripts/check_guides.py` checks chapter headings against mini agent-1, duplicate IDs, 284 links, and 184 displayed source ranges across both bilingual guides. Rebuilding is deterministic. Headless Microsoft Edge checked widths 1280, 390, and 320, chapter/language routes, all 27 remaining code excerpts in each language, and the removal of the extra sections. At each width, 21 reading and code elements matched 10 computed style properties against mini agent-1. No page overflow or script errors occurred. Runtime tests were not repeated for these documentation-only changes.

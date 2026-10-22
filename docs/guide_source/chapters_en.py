@@ -26,8 +26,6 @@ TEXT = {
  ('Control one operation with a small loop', ['operation represents one HTTP attempt. run_with_retry controls attempts, waiting, and stopping; it knows no tool names and performs no file operations.', 'Waiting and randomness can be injected so regression checks do not need real delays. Exceptions other than RequestFailure propagate.'], [('Bounded retries and backoff', 'The success branch checks Signal too, discarding results that arrive after cancellation.')]),
  ('Classify HTTP failures and validate the response', ['Catch HTTPError before its parent URLError so the status is preserved. once validates the body rather than interpreting HTTP 200 as permission to execute. finish_reason must be stop or tool_calls and agree with whether tool calls are present.'], [('The scope of one request', 'The retry helper receives once, not agent_loop.'), ('Validate a complete response', 'This checks call IDs and JSON objects. Tool handlers still validate path, content, and other business fields.')]),
  ('Connect the caller and count the operations', ['call_llm retains the request body and replaces only the sending step. Retries reuse the Request without rebuilding the loop or completed tool results.', 'The regression returns 503, a tool intention, 429, and a final answer in order, counting sends, tool executions, and history entries separately.'], [('Connecting the transport layer', 'Request construction and tool execution belong to different functions.'), ('Four requests, one tool execution', 'This offline control-flow check runs through the real agent loop.')])],
- run=['Offline regression; no real model requests'],
- checks=['The initial send plus retries stays within budget; 401, unknown outcomes, and invalid responses are not retried automatically.', 'Even when requests before and after a tool encounter retryable failures, the tool executes once.', 'Cancellation stops further backoff attempts and prevents late responses from entering the loop.'],
  boundary='This policy does not guarantee that the server processes or bills a request once, and it does not recover crashed tools. Global cost budgets and cross-request deadlines are not implemented.'),
 
 9: dict(title='Execution records and recovery', subtitle='Distinguish three kinds of missing result',
@@ -53,8 +51,6 @@ tool: deliver that result to the model</pre>
  ('Connect started and result around the tool', ['Runtime._tool saves started, calls submit, and saves result after obtaining a string. Its try block covers the tool itself, leaving journal and host-event failures outside.'], [('Record order around real execution', 'An exit between started and result preserves an unknown outcome.')]),
  ('Restore pending calls by ID', ['restore tracks pending, starts, and results. A saved result can complete a message. Unknown outcomes raise RecoveryRequired before any model request.'], [('Restore pairing without replay', 'The restorer has no path that invokes a handler.')]),
  ('Check files and history across a real exit', ['A subprocess writes a file and exits before result. The new runner must block its Provider; another exit point after result verifies reuse of saved output.'], [('Recovery after a write and exit', 'The file state and execution count are evidence alongside the reported error.')])],
- run=['Offline recovery and locking checks', 'Read-only phase inspection of an existing advanced journal'],
- checks=['An exit after a write but before result leaves a changed file and blocks continuation without repeating the tool.', 'An exit after result restores the tool message using saved output.', 'Corruption preserves the original log; a second process cannot write the same journal concurrently.'],
  boundary='No transactions for arbitrary external actions, exactly-once execution, automatic state inspection, or basic Session migration are provided. Locking targets local filesystems.'),
 
 10: dict(title='Streaming responses', subtitle='Preview text early; execute only a complete intention',
@@ -77,8 +73,6 @@ assembled: {"path":"report.txt","content":"hello"}</pre>
  ('Assemble fields by call index', ['consume accumulates id, name, and arguments for each index. Arguments remain strings until final parsing; no submit call occurs between fragments.'], [('Consume one SSE event', 'Text deltas go to on_delta, which is a display callback, not an execution entry point.')]),
  ('Return only after complete termination', ['collect_stream frames events at blank lines and bounds total and per-line input. At termination it checks finish, DONE, and indices before constructing the message.'], [('Event boundaries and acceptance', 'Missing DONE or finish never returns a partial response.')]),
  ('Reuse the loop for persistence and execution', ['Runtime._request forwards text_delta only to display. The complete result still passes Signal and response checks before the original loop saves and executes it.'], [('Connect preview and committed responses', 'Every request source passes through response validation.')])],
- run=['Offline and local SSE checks'],
- checks=['Unicode text and fragmented arguments assemble into a complete message.', 'Missing termination, truncation, or cancellation creates no assistant history or tool side effects.', 'The local HTTP endpoint receives stream=true and returns SSE.'],
  boundary='Compatibility with all providers is unverified. Stream resumption, multimodal input, and immediate cross-thread cancellation of blocking reads are not implemented.'),
 
 11: dict(title='Tool permissions and stopping', subtitle='The model proposes; the host authorizes',
@@ -103,8 +97,6 @@ report.txt must not appear</pre>
  ('Authorize before invoking handlers', ['submit checks cancellation and registration before write permission. It rejects a direct write request even when no write declaration was exposed.'], [('Authorization at dispatch', 'Rejection must precede any actual file operation.')]),
  ('Resolve paths and preserve evidence', ['path does not trust a string prefix. It rejects resolved escapes and prevents tools from rewriting their journals or Git metadata.'], [('The path boundary', 'This does not isolate arbitrary trusted Python or all hostile concurrent link replacements.')]),
  ('Check cancellation before changing state', ['_write validates the path and content, checks Signal, then creates parents and writes. That checkpoint is not a transaction and cannot reverse a write already started.'], [('Business input and the write checkpoint', 'Authorization, input validity, and stopping answer different questions.')])],
- run=['Offline authorization, junction, and cancellation checks'],
- checks=['Fabricated write and bash calls are rejected without file artifacts.', 'Resolved escapes, reserved directories, and special Windows paths are rejected.', 'An already-triggered cancellation prevents file creation.'],
  boundary='No OS sandbox, authorized shell execution, Windows process-tree termination, or file rollback is provided. Trusted handlers retain host Python privileges.'),
 
 12: dict(title='Testing and outcome evaluation', subtitle='Separate a working execution path from model success',
@@ -125,8 +117,6 @@ report.txt must not appear</pre>
  ('Isolate attempts and inspect artifacts', ['evaluate creates a temporary workspace and Journal for each attempt, then checks files, errors, and final content. Temporary state never becomes the next attempt\'s starting point.'], [('From one task to repeated attempts', 'The passed condition is separate from the Provider claiming success.')]),
  ('Persist a checkable report', ['main accepts repetition count and output path. Any failure produces a nonzero exit; a JSON file existing does not establish an all-pass run.'], [('Reports and process status', 'Use a fresh output path when saving evidence to preserve earlier records.')]),
  ('Check that the evaluator recognizes runtime errors', ['The test forces Runtime.run to fail, verifying that attempts remain failed records rather than disappearing or counting as passes, without exposing raw exception details.'], [('Regression for evaluator failures', 'The measurement apparatus needs its own failure criteria.')])],
- run=['Three tasks repeated three times; no real model requests'],
- checks=['read, write_edit, and deny_write use independent starts and actual result criteria.', 'real_model=false; unmeasured tokens and cost are null.', 'Runtime errors do not pass, and any failed task makes the command exit nonzero.'],
  boundary='There is no real-model baseline, cost collection, statistical-significance claim, or general coding benchmark. This small suite covers only the stated execution paths.'),
 
 13: dict(title='Session composition and extension interfaces', subtitle='Connect the lifecycle to one loop',
@@ -148,7 +138,5 @@ Runtime B → Journal B / root B / Signal B / registry B</pre>
  ('Put restoration and execution in one lifecycle', ['run restores under a lock, records new input, and enters the loop. An already completed log without a new task returns directly without another model request.'], [('Restoration, append, and loop composition', 'The lock spans restoration and execution, not merely opening the journal.')]),
  ('State the trusted extension contract', ['Name, Schema, and handler must agree. mutating defaults to True, treating an action as modifying state. The host supplies this classification; it is not inferred from the function.'], [('Trusted extension registration', 'Trusted Python retains host privileges; a registry is not a sandbox.')]),
  ('Enter the same composition from the CLI', ['--status reads saved phases and returns without a model request. Real runs create Runtime and interpret termination state. Resume uses the recorded root and current startup authorization.'], [('The advanced entry point and exit codes', 'Normal completion is 0, unfinished execution 2, runtime errors 1, and interruption 130. Exit 0 does not replace artifact validation.')])],
- run=['Entry-point help and composition regression; no real model requests'],
- checks=['Separate instances keep independent roots, registries, and Signal.', 'Repeated Provider tool IDs are rejected before a second execution.', 'Resuming a completed log sends no request; incomplete and error states retain distinct exits.'],
  boundary='Session branches, multi-agent collaboration, remote plugins, and complete Provider configuration management are absent. Registration does not establish the trustworthiness of extension code.'),
 }

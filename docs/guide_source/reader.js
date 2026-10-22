@@ -1,5 +1,5 @@
 (() => {
-  const offset = () => document.documentElement.style.setProperty('--nav-offset', Math.ceil(document.querySelector('.top').getBoundingClientRect().height) + 24 + 'px');
+  const offset = () => document.documentElement.style.setProperty('--series-offset', Math.ceil(document.querySelector('.top').getBoundingClientRect().height) + 24 + 'px');
   offset(); addEventListener('resize', offset);
   const languageSwitch = document.querySelector('.language-switch');
   const switchTarget = languageSwitch.dataset.target;

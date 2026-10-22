@@ -64,51 +64,6 @@
       "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
     },
     {
-      "chapter": 8,
-      "path": "mini_agent/config.py",
-      "start": 1,
-      "end": 51,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/retry.py",
-      "start": 1,
-      "end": 67,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/transport.py",
-      "start": 1,
-      "end": 96,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/llm.py",
-      "start": 1,
-      "end": 99,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/retry_selfcheck.py",
-      "start": 1,
-      "end": 223,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
-    },
-    {
       "chapter": 9,
       "path": "mini_agent/journal.py",
       "start": 69,
@@ -143,24 +98,6 @@
       "kind": "snippet",
       "symbol": "AdvancedChecks.test_real_crash_unknown_blocks_then_explicit_ack",
       "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
-    },
-    {
-      "chapter": 9,
-      "path": "mini_agent/journal.py",
-      "start": 1,
-      "end": 123,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
-    },
-    {
-      "chapter": 9,
-      "path": "mini_agent/runtime.py",
-      "start": 1,
-      "end": 76,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
     },
     {
       "chapter": 10,
@@ -199,15 +136,6 @@
       "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
     },
     {
-      "chapter": 10,
-      "path": "mini_agent/streaming.py",
-      "start": 1,
-      "end": 111,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
-    },
-    {
       "chapter": 11,
       "path": "mini_agent/permissions.py",
       "start": 8,
@@ -241,15 +169,6 @@
       "end": 84,
       "kind": "snippet",
       "symbol": "WorkspaceTools._write",
-      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
-    },
-    {
-      "chapter": 11,
-      "path": "mini_agent/permissions.py",
-      "start": 1,
-      "end": 96,
-      "kind": "file",
-      "symbol": null,
       "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
     },
     {
@@ -289,24 +208,6 @@
       "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
     },
     {
-      "chapter": 12,
-      "path": "mini_agent/evaluation.py",
-      "start": 1,
-      "end": 80,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
-    },
-    {
-      "chapter": 12,
-      "path": "mini_agent/advanced_selfcheck.py",
-      "start": 1,
-      "end": 292,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
-    },
-    {
       "chapter": 13,
       "path": "mini_agent/runtime.py",
       "start": 12,
@@ -340,24 +241,6 @@
       "end": 66,
       "kind": "snippet",
       "symbol": "main",
-      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
-    },
-    {
-      "chapter": 13,
-      "path": "mini_agent/agent.py",
-      "start": 1,
-      "end": 187,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "546226cb7e29008881fd555d1593a78d07d7f3e2ce51d03e90875d4665035022"
-    },
-    {
-      "chapter": 13,
-      "path": "mini_agent/advanced.py",
-      "start": 1,
-      "end": 70,
-      "kind": "file",
-      "symbol": null,
       "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
     }
   ],
@@ -818,51 +701,6 @@
       "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
     },
     {
-      "chapter": 8,
-      "path": "mini_agent/config.py",
-      "start": 1,
-      "end": 51,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "dfaa3844b763fab55945524d44ce6f51b296de147dd966686a40b549be3f05a7"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/retry.py",
-      "start": 1,
-      "end": 67,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "dd0d0ed0cba60707c6a65b6ed6769066eb2268b5bca8eed8971b01a7769e7912"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/transport.py",
-      "start": 1,
-      "end": 96,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "b3338c4472de25b45b6a45b994c64c179b12c06c9c850beec0083d40535c53c5"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/llm.py",
-      "start": 1,
-      "end": 99,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "b6e9d4f5adb296d167e4fc26316694c48a5428fa158161bdadc60cfbbf256af1"
-    },
-    {
-      "chapter": 8,
-      "path": "mini_agent/retry_selfcheck.py",
-      "start": 1,
-      "end": 223,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "12f7fa84795e64525aa0ab6b55991f8e35611f4fc7c5db771394bf33069d99ce"
-    },
-    {
       "chapter": 9,
       "path": "mini_agent/journal.py",
       "start": 69,
@@ -897,24 +735,6 @@
       "kind": "snippet",
       "symbol": "AdvancedChecks.test_real_crash_unknown_blocks_then_explicit_ack",
       "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
-    },
-    {
-      "chapter": 9,
-      "path": "mini_agent/journal.py",
-      "start": 1,
-      "end": 123,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "977c07f7be2809647074d29d1015d4aeaaafecd7d38c321c868e677a5e620c1e"
-    },
-    {
-      "chapter": 9,
-      "path": "mini_agent/runtime.py",
-      "start": 1,
-      "end": 76,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
     },
     {
       "chapter": 10,
@@ -953,15 +773,6 @@
       "sha256": "7bb466fdbd5a573c6fe2d809bf8c034f2f57baeec656a10462547d8380a7a1ac"
     },
     {
-      "chapter": 10,
-      "path": "mini_agent/streaming.py",
-      "start": 1,
-      "end": 111,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "a5278d78912c8cd86f276452c95fe308b9ad5aa93ffcc91f4c6103dc40600da9"
-    },
-    {
       "chapter": 11,
       "path": "mini_agent/permissions.py",
       "start": 8,
@@ -995,15 +806,6 @@
       "end": 84,
       "kind": "snippet",
       "symbol": "WorkspaceTools._write",
-      "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
-    },
-    {
-      "chapter": 11,
-      "path": "mini_agent/permissions.py",
-      "start": 1,
-      "end": 96,
-      "kind": "file",
-      "symbol": null,
       "sha256": "3a3ce0e45a5b5a9fb6bce7f3cad795f671defd3fb99d387234a00917476575b8"
     },
     {
@@ -1043,24 +845,6 @@
       "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
     },
     {
-      "chapter": 12,
-      "path": "mini_agent/evaluation.py",
-      "start": 1,
-      "end": 80,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "21c09322b41945efd1e59f5bd145ec0a3958b905a3de5186a097a365fb2c4ba0"
-    },
-    {
-      "chapter": 12,
-      "path": "mini_agent/advanced_selfcheck.py",
-      "start": 1,
-      "end": 292,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "2a82806b316c4e355e82e02fdfd7c495995325a3e0f9f370829490dc109a4f53"
-    },
-    {
       "chapter": 13,
       "path": "mini_agent/runtime.py",
       "start": 12,
@@ -1094,24 +878,6 @@
       "end": 66,
       "kind": "snippet",
       "symbol": "main",
-      "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
-    },
-    {
-      "chapter": 13,
-      "path": "mini_agent/agent.py",
-      "start": 1,
-      "end": 187,
-      "kind": "file",
-      "symbol": null,
-      "sha256": "546226cb7e29008881fd555d1593a78d07d7f3e2ce51d03e90875d4665035022"
-    },
-    {
-      "chapter": 13,
-      "path": "mini_agent/advanced.py",
-      "start": 1,
-      "end": 70,
-      "kind": "file",
-      "symbol": null,
       "sha256": "d9cbfe3cb26eb3a6eddeb83779e91e573c1837ca272cfbd61a7f4fcf097628d7"
     }
   ],

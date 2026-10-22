@@ -18,6 +18,8 @@ class Page(HTMLParser):
         self.ids = set()
         self.sources = []
         self.capture = None
+        self.chapters = {}
+        self.heading = None
         self.feed(text)
 
     def handle_starttag(self, tag, attributes):
@@ -25,10 +27,19 @@ class Page(HTMLParser):
         if 'href' in attrs:
             self.links.append(attrs['href'])
         if 'id' in attrs:
+            if attrs['id'] in self.ids:
+                raise AssertionError(f'Duplicate ID: {attrs["id"]}')
             self.ids.add(attrs['id'])
         if tag in {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}:
             return
         self.stack.append((tag, attrs))
+        if 'chapter' in attrs.get('class', '').split():
+            self.chapters[attrs['id']] = []
+        if tag == 'h3' and attrs.get('class') == 'sub':
+            chapter = next((a['id'] for _, a in reversed(self.stack)
+                            if 'chapter' in a.get('class', '').split()), None)
+            if chapter:
+                self.heading = dict(chapter=chapter, text='')
         if tag == 'pre':
             numbered = any(a.get('class') in {'linenos', 'linenodiv'} for _, a in self.stack)
             source = next((a for _, a in reversed(self.stack)
@@ -39,6 +50,9 @@ class Page(HTMLParser):
                                     end=int(source.get('data-last', source.get('data-end'))), text='')
 
     def handle_endtag(self, tag):
+        if tag == 'h3' and self.heading is not None:
+            self.chapters[self.heading['chapter']].append(self.heading['text'])
+            self.heading = None
         if tag == 'pre' and self.capture is not None:
             self.sources.append(self.capture)
             self.capture = None
@@ -48,6 +62,8 @@ class Page(HTMLParser):
                 break
 
     def handle_data(self, text):
+        if self.heading is not None:
+            self.heading['text'] += text
         if self.capture is not None:
             self.capture['text'] += text
 
@@ -55,7 +71,14 @@ class Page(HTMLParser):
 def check():
     subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/build_guides.py'), '--check'], check=True)
     pages = {name: Page((ROOT / name).read_text(encoding='utf-8')) for name in PAGES}
-    expected_counts = (65, 65, 40, 40)
+    expected_counts = (65, 65, 27, 27)
+    for basic, advanced in (('guide.html', 'advanced-guide.html'), ('guide.zh-CN.html', 'advanced-guide.zh-CN.html')):
+        expected = pages[basic].chapters['ch1']
+        if len(expected) != 5 or len(pages[advanced].chapters) != 6:
+            raise AssertionError('Unexpected chapter structure')
+        for chapter, headings in pages[advanced].chapters.items():
+            if headings != expected:
+                raise AssertionError(f'{advanced}#{chapter}: headings differ from mini agent-1')
     report = {}
     for (name, page), count in zip(pages.items(), expected_counts):
         if len(page.sources) != count:
